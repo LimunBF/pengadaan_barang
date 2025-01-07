@@ -63,6 +63,9 @@
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('barang.index') }}">Daftar Barang</a>
+                    </li>                    
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('gudang.index') }}">Gudang</a>
                     </li>
                     <li class="nav-item">
