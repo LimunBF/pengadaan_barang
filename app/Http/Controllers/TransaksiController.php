@@ -3,96 +3,70 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Transaksi;
+use App\Models\Gudang;
 
 class TransaksiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Simulasi data transaksi
-        $transaksis = [
-            [
-                'id_transaksi' => 1,
-                'id_barang' => 'B001',
-                'nama_barang' => 'Laptop',
-                'tipe_transaksi' => 'masuk',
-                'kuantitas' => 2,
-                'nama_pengirim_penerima' => 'John Doe',
-                'waktu' => '2025-01-06 10:00:00',
-                'catatan' => 'Barang baru diterima.',
-            ],
-            [
-                'id_transaksi' => 2,
-                'id_barang' => 'B002',
-                'nama_barang' => 'Printer',
-                'tipe_transaksi' => 'keluar',
-                'kuantitas' => 1,
-                'nama_pengirim_penerima' => 'Jane Doe',
-                'waktu' => '2025-01-06 11:00:00',
-                'catatan' => 'Barang dikirim ke divisi IT.',
-            ],
-        ];
+        // Ambil semua data transaksi
+        $transaksi = Transaksi::orderBy('waktu', 'desc')->get();
 
-        return view('transaksi.index', compact('transaksis'));
+        // Return view dengan data transaksi
+        return view('transaksi.index', compact('transaksi'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('transaksi.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validasi data
+        // Validasi input
         $request->validate([
-            'id_barang' => 'required|string|max:50',
-            'tipe_transaksi' => 'required|in:masuk,keluar',
+            'proses' => 'required|in:masuk,keluar',
+            'id_barang' => 'required|string|exists:gudang,id_barang',
+            'kuantitas' => 'required|integer|min:1',
+            'nama_pengirim_penerima' => 'required|string|max:255',
+            'catatan' => 'nullable|string',
+        ]);
+        $request->validate([
+            'proses' => 'required|in:masuk,keluar',
+            'id_barang' => 'required|string|exists:gudang,id_barang',
             'kuantitas' => 'required|integer|min:1',
             'nama_pengirim_penerima' => 'required|string|max:255',
             'catatan' => 'nullable|string',
         ]);
 
-        // Simulasi menyimpan data
-        return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil dicatat.');
-    }
+        // Ambil data barang dari tabel gudang
+        $barang = Gudang::where('id_barang', $request->id_barang)->first();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if (!$barang) {
+            return redirect()->back()->with('error', 'Barang tidak ditemukan.');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        // Update stok berdasarkan jenis transaksi
+        if ($request->proses === 'masuk') {
+            $barang->stok += $request->kuantitas;
+        } elseif ($request->proses === 'keluar') {
+            if ($barang->stok < $request->kuantitas) {
+                return redirect()->back()->with('error', 'Stok barang tidak mencukupi.');
+            }
+            $barang->stok -= $request->kuantitas;
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Simpan perubahan stok barang
+        $barang->save();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        // Simpan transaksi ke database
+        Transaksi::create([
+            'id_barang' => $request->id_barang,
+            'tipe_transaksi' => $request->proses,
+            'kuantitas' => $request->kuantitas,
+            'nama_pengirim_penerima' => $request->nama_pengirim_penerima,
+            'waktu' => now(),
+            'catatan' => $request->catatan,
+        ]);
+
+        return redirect()->back()->with('success', 'Transaksi berhasil disimpan.');
+
+        // Simpan logika store seperti sebelumnya
     }
 }

@@ -107,7 +107,20 @@ class BarangController extends Controller
             ->route('barang.create')
             ->with('success', 'Barang berhasil ditambahkan.')
             ->with('qr_code_url', $qrCodePath);
-    }    
+    }
+    
+    public function getBarang($id_barang){
+        $barang = Barang::where('id_barang', $id_barang)->first();
+
+        // Jika data tidak ditemukan, kembalikan pesan error
+        if (!$barang) {
+            return response()->json(['error' => 'Data barang tidak ditemukan'], 404);
+        }
+
+        // Kembalikan data barang dalam format JSON
+        return response()->json($barang);
+    }
+
     
     public function downloadQRCode($id_barang)
     {
@@ -125,5 +138,5 @@ class BarangController extends Controller
     
         return response()->download($filePath, "{$id_barang}_qrcode.png")->deleteFileAfterSend(false);
     }
-
 }
+

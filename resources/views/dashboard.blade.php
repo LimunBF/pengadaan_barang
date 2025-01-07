@@ -147,5 +147,39 @@
         photoTaken = false; // Reset state
         cameraContainer.style.display = 'block'; // Reset camera visibility
     }
+    
+    document.getElementById('id_barang').addEventListener('change', function () {
+    let idBarang = this.value;
+
+    // Pastikan ID barang tidak kosong
+    if (idBarang.trim() === '') {
+        clearBarangForm();
+        return;
+    }
+
+    // AJAX request untuk mengambil data barang
+    fetch(`/barang/${idBarang}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Data barang tidak ditemukan');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Pastikan elemen tersedia sebelum mengisi nilai
+            if (document.getElementById('nama_barang')) {
+                document.getElementById('nama_barang').value = data.nama_barang || '';
+            }
+            if (document.getElementById('jenis_barang')) {
+                document.getElementById('jenis_barang').value = data.jenis_barang || '';
+           
+            }
+            if (document.getElementById('deskripsi_barang')) {
+                document.getElementById('deskripsi_barang').value = data.deskripsi_barang || '';
+            }
+        }
+    )
+    }
+)
 </script>
 @endsection
