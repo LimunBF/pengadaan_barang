@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4">Sistem Pengelolaan Gudang Diskominfo Madiun</h1>
     <h2>Form Pengambilan dan Penerimaan Barang</h2>
 
     {{-- Feedback Notifikasi --}}

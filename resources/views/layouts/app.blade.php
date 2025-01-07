@@ -21,6 +21,9 @@
             font-size: 1.7rem;
             color: #ffffff;
         }
+        .navbar-brand:hover {
+            color: #2673FB;
+        }
         .navbar-nav .nav-link {
             color: rgba(255, 255, 255, 0.8);
         }
