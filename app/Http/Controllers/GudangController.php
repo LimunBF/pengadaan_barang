@@ -15,7 +15,7 @@ class GudangController extends Controller
         $gudangs = [
             [
                 'id_barang' => 'B001',
-                'nama_barang' => 'Laptop',
+                'nama_barang' => 'Kunci',
                 'jenis_barang' => 'Elektronik',
                 'deskripsi_barang' => 'Laptop untuk kantor.',
                 'stok' => 10,

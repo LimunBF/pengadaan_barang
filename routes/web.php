@@ -7,7 +7,15 @@ use App\Http\Controllers\TransaksiController;
 
 // Halaman Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
 
-// Resource Routes
-Route::resource('gudang', GudangController::class);
-Route::resource('transaksi', TransaksiController::class);
+// Halaman Gudang
+Route::get('/gudang', [GudangController::class, 'index'])->name('gudang.index');
+
+// Halaman Transaksi
+Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+// Rute untuk menyimpan transaksi
+Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaksi.store');
+    
+
+Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
