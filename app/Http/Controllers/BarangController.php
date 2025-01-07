@@ -82,8 +82,19 @@ class BarangController extends Controller
             'deskripsi_barang' => $request->deskripsi_barang,
         ]);
     
-        // Generate QR Code
+        // Generate QR Code dan simpan path-nya
         $qrCodePath = $this->generateQRCode($barang);
+    
+        // Update kode_qr dan qr_code_path di database
+        $barang->update([
+            'kode_qr' => json_encode([
+                'id_barang' => $barang->id_barang,
+                'nama_barang' => $barang->nama_barang,
+                'jenis_barang' => $barang->jenis_barang,
+                'deskripsi_barang' => $barang->deskripsi_barang,
+            ]),
+            'qr_code_path' => $qrCodePath,
+        ]);
     
         // Simpan id_barang di session untuk keperluan download
         session([
@@ -96,7 +107,7 @@ class BarangController extends Controller
             ->route('barang.create')
             ->with('success', 'Barang berhasil ditambahkan.')
             ->with('qr_code_url', $qrCodePath);
-    }
+    }    
     
     public function downloadQRCode($id_barang)
     {

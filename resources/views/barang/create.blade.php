@@ -33,7 +33,7 @@
     </form>
 
     <!-- Section to display QR Code after saving -->
-    @if (session('qr_code_url'))
+    @if (session('qr_code_url') && session('last_generated_id'))
         <div class="mt-4">
             <h4>QR Code Barang</h4>
             <img src="{{ session('qr_code_url') }}" alt="QR Code" class="img-fluid" style="max-width: 150px;">
@@ -45,6 +45,7 @@
             </a>
         </div>
     @endif
+
 
 </div>
 @endsection
