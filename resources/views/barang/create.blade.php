@@ -37,7 +37,14 @@
         <div class="mt-4">
             <h4>QR Code Barang</h4>
             <img src="{{ session('qr_code_url') }}" alt="QR Code" class="img-fluid" style="max-width: 150px;">
+
+            <!-- Tombol Download QR Code -->
+            <a href="{{ route('barang.download_qr', ['id_barang' => session('last_generated_id')]) }}" 
+            class="btn btn-success mt-3">
+                Download QR Code
+            </a>
         </div>
     @endif
+
 </div>
 @endsection

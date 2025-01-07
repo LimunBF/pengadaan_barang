@@ -10,6 +10,7 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Color\Color;
+use Illuminate\Support\Facades\Log;
 
 class BarangController extends Controller
 {
@@ -65,40 +66,53 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input dari form
+        // Validasi input
         $request->validate([
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
             'deskripsi_barang' => 'required|string',
         ]);
-
-        // Simpan data barang ke database (tanpa QR Code dahulu)
+    
+        // Simpan data barang
         $barang = Barang::create([
             'id_barang' => $request->id_barang,
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
             'deskripsi_barang' => $request->deskripsi_barang,
         ]);
-
-        // Generate QR Code dan simpan path-nya
+    
+        // Generate QR Code
         $qrCodePath = $this->generateQRCode($barang);
-
-        // Update path gambar QR Code dan teks JSON ke tabel barang
-        $barang->update([
-            'kode_qr' => json_encode([
-                'id_barang' => $barang->id_barang,
-                'nama_barang' => $barang->nama_barang,
-                'jenis_barang' => $barang->jenis_barang,
-                'deskripsi_barang' => $barang->deskripsi_barang,
-            ]),
-            'qr_code_path' => $qrCodePath,
+    
+        // Simpan id_barang di session untuk keperluan download
+        session([
+            'last_generated_id' => $barang->id_barang,
+            'last_generated_qr_path' => $qrCodePath,
         ]);
-
+    
         // Redirect dengan pesan sukses
         return redirect()
             ->route('barang.create')
             ->with('success', 'Barang berhasil ditambahkan.')
             ->with('qr_code_url', $qrCodePath);
     }
+    
+    public function downloadQRCode($id_barang)
+    {
+        $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
+        $filePath = public_path("qr_codes/{$id_barang}.png");
+    
+        Log::info("Checking file path: {$filePath}");
+    
+        if (!file_exists($filePath)) {
+            Log::error("File not found: {$filePath}");
+            return redirect()->back()->with('error', 'File QR Code tidak ditemukan.');
+        }
+    
+        Log::info("File found, proceeding to download: {$filePath}");
+    
+        return response()->download($filePath, "{$id_barang}_qrcode.png")->deleteFileAfterSend(false);
+    }
+
 }

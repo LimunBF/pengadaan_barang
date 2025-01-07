@@ -22,3 +22,5 @@ Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('
 // Rute untuk halaman barang
 Route::get('/barang/create', [BarangController::class, 'create'])->name('barang.create');
 Route::post('/barang/store', [BarangController::class, 'store'])->name('barang.store');
+
+Route::get('/barang/{id_barang}/download-qr', [BarangController::class, 'downloadQRCode'])->name('barang.download_qr');
