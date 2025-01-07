@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Gudang; // Import model Gudang
 
 class GudangController extends Controller
 {
@@ -11,24 +12,10 @@ class GudangController extends Controller
      */
     public function index()
     {
-        // Simulasi data barang di gudang
-        $gudangs = [
-            [
-                'id_barang' => 'B001',
-                'nama_barang' => 'Kunci',
-                'jenis_barang' => 'Elektronik',
-                'deskripsi_barang' => 'Laptop untuk kantor.',
-                'stok' => 10,
-            ],
-            [
-                'id_barang' => 'B002',
-                'nama_barang' => 'Printer',
-                'jenis_barang' => 'Elektronik',
-                'deskripsi_barang' => 'Printer multifungsi.',
-                'stok' => 5,
-            ],
-        ];
+        // Ambil data dari tabel gudang
+        $gudangs = Gudang::all();
 
+        // Kirim data ke view
         return view('gudang.index', compact('gudangs'));
     }
 
@@ -47,13 +34,16 @@ class GudangController extends Controller
     {
         // Validasi data
         $request->validate([
+            'id_barang' => 'required|string|max:50|unique:gudang,id_barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
             'stok' => 'required|integer|min:0',
         ]);
 
-        // Simulasi menyimpan data
+        // Simpan data ke tabel gudang
+        Gudang::create($request->all());
+
         return redirect()->route('gudang.index')->with('success', 'Barang berhasil ditambahkan.');
     }
 
@@ -62,7 +52,9 @@ class GudangController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $gudang = Gudang::findOrFail($id);
+
+        return view('gudang.show', compact('gudang'));
     }
 
     /**
@@ -70,7 +62,9 @@ class GudangController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $gudang = Gudang::findOrFail($id);
+
+        return view('gudang.edit', compact('gudang'));
     }
 
     /**
@@ -78,7 +72,19 @@ class GudangController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validasi data
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'jenis_barang' => 'required|string|max:255',
+            'deskripsi_barang' => 'nullable|string',
+            'stok' => 'required|integer|min:0',
+        ]);
+
+        // Update data di tabel gudang
+        $gudang = Gudang::findOrFail($id);
+        $gudang->update($request->all());
+
+        return redirect()->route('gudang.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
     /**
@@ -86,6 +92,9 @@ class GudangController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $gudang = Gudang::findOrFail($id);
+        $gudang->delete();
+
+        return redirect()->route('gudang.index')->with('success', 'Barang berhasil dihapus.');
     }
 }
