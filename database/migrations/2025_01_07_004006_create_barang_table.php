@@ -13,7 +13,8 @@ class CreateBarangTable extends Migration
             $table->string('nama_barang', 255);
             $table->string('jenis_barang', 255);
             $table->text('deskripsi_barang')->nullable();
-            $table->text('kode_qr')->nullable();
+            $table->text('kode_qr')->nullable(); // Menyimpan JSON data
+            $table->string('qr_code_path', 255)->nullable(); // Path untuk gambar QR Code
             $table->timestamps();
         });
     }
