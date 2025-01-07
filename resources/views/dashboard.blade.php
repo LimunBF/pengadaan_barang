@@ -5,6 +5,7 @@
 @section('content')
 <div class="container">
     <h2>Form Pengambilan dan Penerimaan Barang</h2>
+    <a href="{{ route('barang.create') }}" class="btn btn-success float-end">Tambah Barang</a>
 
     {{-- Feedback Notifikasi --}}
     @if (session('success'))

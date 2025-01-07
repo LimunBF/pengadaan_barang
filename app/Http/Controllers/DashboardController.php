@@ -10,4 +10,9 @@ class DashboardController extends Controller
     {
         return view('dashboard');
     }
+
+    public function createBarang()
+    {
+        return view('barang.create');
+    }
 }

@@ -19,3 +19,7 @@ Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('tr
     
 
 Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
+<<<<<<< Updated upstream
+=======
+Route::get('/barang/create', [DashboardController::class, 'createBarang'])->name('barang.create');
+>>>>>>> Stashed changes
