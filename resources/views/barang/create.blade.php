@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Tambah Barang')
+
 @section('content')
 <div class="container">
     <h2>Tambah Barang</h2>
@@ -26,7 +28,7 @@
         </div>
         <div class="form-group">
             <label for="deskripsi_barang">Deskripsi Barang</label>
-            <textarea class="form-control" id="deskripsi_barang" name="deskripsi_barang" rows="4" required></textarea>
+            <textarea class="form-control" id="deskripsi_barang" name="deskripsi_barang" rows="4"></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Simpan</button>
