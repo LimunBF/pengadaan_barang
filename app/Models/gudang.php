@@ -21,5 +21,7 @@ class Gudang extends Model
         'jenis_barang',
         'deskripsi_barang',
         'stok',
+        'created_at',
+        'updated_at',
     ];
 }
