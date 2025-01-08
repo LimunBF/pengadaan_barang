@@ -10,25 +10,26 @@ class DaftarBarangController extends Controller
 {
     public function index(Request $request)
     {
-        // Periksa apakah URL sebelumnya bukan /barang
+        // Reset edit mode jika berasal dari halaman lain
         if ($request->headers->get('referer') && parse_url($request->headers->get('referer'), PHP_URL_PATH) !== '/barang') {
-            // Hapus session edit_id
             session()->forget('edit_id');
         }
     
-        // Ambil semua data barang
-        $barang = Barang::all();
+        // Filter kondisi barang (default: 'ada')
+        $filter = $request->get('filter', 'ada');
+        $barang = Barang::where('kondisi', $filter)->get();
     
         // Kirim data ke view
-        return view('daftar_barang.index', compact('barang'));
+        return view('daftar_barang.index', compact('barang', 'filter'));
     }
-
+    
     public function enableEditMode($id)
     {
-        // Simpan ID barang ke dalam session untuk mengaktifkan mode edit
         session(['edit_id' => $id]);
         return redirect()->back();
     }
+    
+    
 
     public function update(Request $request, $id_barang)
     {
@@ -37,13 +38,14 @@ class DaftarBarangController extends Controller
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
+            'foto_barang' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi untuk gambar
         ]);
 
         // Ambil data barang
         $barang = Barang::findOrFail($id_barang);
 
-        // Update data barang sekaligus kode QR dalam satu operasi
-        $barang->update([
+        // Update data barang
+        $dataUpdate = [
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
             'deskripsi_barang' => $request->deskripsi_barang,
@@ -53,7 +55,36 @@ class DaftarBarangController extends Controller
                 'jenis_barang' => $request->jenis_barang,
                 'deskripsi_barang' => $request->deskripsi_barang ?? '-',
             ]),
-        ]);
+        ];
+
+        // Jika ada file gambar baru, proses gambar
+        if ($request->hasFile('foto_barang')) {
+            Log::info('File gambar diterima: ' . $request->file('foto_barang')->getClientOriginalName());
+
+            // Hapus gambar lama jika ada
+            if ($barang->foto_barang) {
+                $relativePath = str_replace(asset('storage'), '', $barang->foto_barang); // Hapus bagian URL
+                $oldImagePath = storage_path('app/public' . $relativePath);
+
+                Log::info('Path gambar lama: ' . $oldImagePath);
+                if (file_exists($oldImagePath)) {
+                    Log::info('Gambar lama ditemukan dan akan dihapus.');
+                    unlink($oldImagePath); // Hapus file gambar lama
+                } else {
+                    Log::error('Gambar lama tidak ditemukan di path: ' . $oldImagePath);
+                }
+            }
+
+            // Simpan file gambar baru
+            $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
+            $fotoUrl = asset('storage/' . $fotoPath);
+
+            // Tambahkan URL gambar baru ke data yang akan diupdate
+            $dataUpdate['foto_barang'] = $fotoUrl;
+        }
+
+        // Perbarui database dengan data baru
+        $barang->update($dataUpdate);
 
         // Reset session edit_id setelah update
         session()->forget('edit_id');
@@ -80,38 +111,28 @@ class DaftarBarangController extends Controller
 
     public function cancelEdit($id)
     {
-        // Periksa apakah barang ada (opsional jika tidak diperlukan, bisa dihapus)
-        $barang = Barang::find($id);
-        if (!$barang) {
-            return redirect()->route('barang.index')->with('error', 'Data barang tidak ditemukan.');
-        }
-    
-        // Hapus session edit_id
         session()->forget('edit_id');
-    
-        // Kembalikan ke halaman daftar barang
         return redirect()->route('barang.index');
     }
-    
     
     public function downloadQRCode($id_barang)
     {
         try {
             // Cari barang berdasarkan id_barang
             $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-
-            // Lokasi file QR Code berdasarkan id_barang
-            $filePath = public_path("qr_codes/{$id_barang}.png");
-
+    
+            // Lokasi file QR Code di folder storage
+            $filePath = storage_path("app/public/barang_qr_codes/{$id_barang}.png");
+    
             // Logging untuk debugging
             Log::info("Trying to download file at: {$filePath}");
-
+    
             // Cek apakah file ada
             if (!file_exists($filePath)) {
                 Log::error("File not found: {$filePath}");
                 return redirect()->back()->with('error', 'QR Code tidak ditemukan.');
             }
-
+    
             // Kembalikan file untuk diunduh
             return response()->download($filePath, "{$id_barang}_qrcode.png");
         } catch (\Exception $e) {
@@ -119,5 +140,5 @@ class DaftarBarangController extends Controller
             Log::error("Error downloading QR Code: {$e->getMessage()}");
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mendownload QR Code.');
         }
-    }
+    }    
 }
