@@ -12,7 +12,7 @@
         </div>
     @endif
 
-    <form action="{{ route('barang.store') }}" method="POST">
+    <form action="{{ route('barang.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="form-group">
             <label for="id_barang">ID Barang</label>
@@ -30,7 +30,11 @@
             <label for="deskripsi_barang">Deskripsi Barang</label>
             <textarea class="form-control" id="deskripsi_barang" name="deskripsi_barang" rows="4"></textarea>
         </div>
-
+        <div class="form-group">
+            <label for="foto_barang">Foto Barang</label>
+            <input type="file" class="form-control" id="foto_barang" name="foto_barang" accept="image/*" required onchange="previewImage(event)">
+            <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3" style="display: none; max-width: 200px;">
+        </div>        
         <button type="submit" class="btn btn-primary mt-3">Simpan</button>
     </form>
 
@@ -47,7 +51,28 @@
             </a>
         </div>
     @endif
-
-
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function previewImage(event) {
+        const input = event.target;
+        const preview = document.getElementById('preview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = '#';
+            preview.style.display = 'none';
+        }
+    }
+</script>
+@endpush

@@ -30,9 +30,6 @@ class BarangController extends Controller
         // Siapkan data untuk QR Code (format JSON)
         $qrData = json_encode([
             'id_barang' => $barang->id_barang,
-            // 'nama_barang' => $barang->nama_barang,
-            // 'jenis_barang' => $barang->jenis_barang,
-            // 'deskripsi_barang' => $barang->deskripsi_barang,
         ]);
 
         // Buat direktori jika belum ada
@@ -65,13 +62,19 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
+            'foto_barang' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Simpan foto barang ke folder 'barang_photos'
+        if ($request->hasFile('foto_barang')) {
+            $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
+            $fotoUrl = asset('storage/' . $fotoPath);
+        }
 
         // Simpan data barang
         $barang = Barang::create([
@@ -79,6 +82,7 @@ class BarangController extends Controller
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
             'deskripsi_barang' => $request->deskripsi_barang,
+            'foto_barang' => $fotoUrl,
         ]);
 
         // Generate QR Code dan simpan path-nya
@@ -95,13 +99,11 @@ class BarangController extends Controller
             'qr_code_path' => $qrCodePath,
         ]);
 
-        // Simpan id_barang di session untuk keperluan download
         session([
             'last_generated_id' => $barang->id_barang,
-            'last_generated_qr_path' => $qrCodePath,
+            'qr_code_url' => $qrCodePath,
         ]);
 
-        // Redirect dengan pesan sukses
         return redirect()
             ->route('barang.create')
             ->with('success', 'Barang berhasil ditambahkan.')
@@ -138,6 +140,7 @@ class BarangController extends Controller
 
         return response()->download($filePath, "{$id_barang}_qrcode.png")->deleteFileAfterSend(false);
     }
+
     public function scan(Request $request)
     {
         // Ambil data JSON dari barcode yang di-scan

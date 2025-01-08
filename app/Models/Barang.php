@@ -29,5 +29,6 @@ class Barang extends Model
         'deskripsi_barang',
         'kode_qr',
         'qr_code_path',
+        'foto_barang', // Kolom baru untuk path foto barang
     ];
 }
