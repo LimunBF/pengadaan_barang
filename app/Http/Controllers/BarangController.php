@@ -31,9 +31,9 @@ class BarangController extends Controller
         // Siapkan data untuk QR Code (format JSON)
         $qrData = json_encode([
             'id_barang' => $barang->id_barang,
-            'nama_barang' => $barang->nama_barang,
-            'jenis_barang' => $barang->jenis_barang,
-            'deskripsi_barang' => $barang->deskripsi_barang,
+            // 'nama_barang' => $barang->nama_barang,
+            // 'jenis_barang' => $barang->jenis_barang,
+            // 'deskripsi_barang' => $barang->deskripsi_barang,
         ]);
 
         // Buat direktori jika belum ada
