@@ -24,23 +24,19 @@
             </thead>
             <tbody>
                 @foreach ($barang as $item)
-                    <tr>
+                    <tr id="row-{{ $item->id_barang }}">
                         <td>{{ $item->id_barang }}</td>
                         <td>
                             <span class="nama_barang_display">{{ $item->nama_barang }}</span>
-                            <form action="{{ route('barang.update', $item->id_barang) }}" method="POST" class="d-inline nama_barang_edit_form" style="display: none;">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="nama_barang" value="{{ $item->nama_barang }}" class="form-control" required>
-                            </form>
+                            <input type="text" name="nama_barang" value="{{ $item->nama_barang }}" class="form-control nama_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};" required>
                         </td>
                         <td>
                             <span class="jenis_barang_display">{{ $item->jenis_barang }}</span>
-                            <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control jenis_barang_edit_form" style="display: none;" required>
+                            <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control jenis_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};" required>
                         </td>
                         <td>
                             <span class="deskripsi_barang_display">{{ $item->deskripsi_barang }}</span>
-                            <input type="text" name="deskripsi_barang" value="{{ $item->deskripsi_barang }}" class="form-control deskripsi_barang_edit_form" style="display: none;">
+                            <input type="text" name="deskripsi_barang" value="{{ $item->deskripsi_barang }}" class="form-control deskripsi_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};">
                         </td>
                         <td>
                             @if ($item->qr_code_path)
@@ -54,8 +50,8 @@
                             @endif
                         </td>
                         <td>
-                            <button type="button" class="btn btn-warning btn-sm btn-edit" onclick="enableEdit(this)">Edit</button>
-                            <button type="submit" class="btn btn-success btn-sm nama_barang_edit_form" style="display: none;">Simpan</button>
+                            <button type="button" class="btn btn-warning btn-sm btn-edit" onclick="enableEdit(this, '{{ $item->id_barang }}')">Edit</button>
+                            <button type="submit" class="btn btn-success btn-sm nama_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};">Simpan</button>
                             </form>
                             <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" class="d-inline">
                                 @csrf
@@ -71,16 +67,53 @@
     </div>
 
     <script>
-        function enableEdit(button) {
-            const row = button.closest('tr');
+        function enableEdit(button, id_barang) {
+            const row = document.querySelector(`#row-${id_barang}`);
+            
+            // Simpan id_barang yang sedang di-edit ke session
+            @php
+                session(['edit_id' => '{{ $item->id_barang }}']);
+            @endphp;
+
+            // Reset semua baris sebelum mengaktifkan mode edit
+            resetAllRows();
+
             // Sembunyikan tampilan statis
             row.querySelectorAll('.nama_barang_display, .jenis_barang_display, .deskripsi_barang_display').forEach(el => {
                 el.style.display = 'none';
             });
+
             // Tampilkan form edit
             row.querySelectorAll('.nama_barang_edit_form, .jenis_barang_edit_form, .deskripsi_barang_edit_form').forEach(el => {
                 el.style.display = 'block';
             });
+
+            // Fokus pada form input pertama
+            row.querySelector('.nama_barang_edit_form input').focus();
         }
+
+        function resetAllRows() {
+            // Reset semua baris ke mode tampilan default
+            const rows = document.querySelectorAll('tr');
+            rows.forEach(row => {
+                const displayElements = row.querySelectorAll('.nama_barang_display, .jenis_barang_display, .deskripsi_barang_display');
+                const editForms = row.querySelectorAll('.nama_barang_edit_form, .jenis_barang_edit_form, .deskripsi_barang_edit_form');
+                
+                // Tampilkan elemen display
+                displayElements.forEach(el => {
+                    el.style.display = 'inline';
+                });
+
+                // Sembunyikan elemen edit form
+                editForms.forEach(el => {
+                    el.style.display = 'none';
+                });
+            });
+        }
+
+        // Reset semua baris ke mode tampilan default saat halaman selesai dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            resetAllRows();
+        });
     </script>
 @endsection
