@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Daftar Barang')
+
 @section('content')
     <div class="container">
         <h1>Daftar Barang</h1>
@@ -11,6 +13,7 @@
             </div>
         @endif
 
+        <!-- Tabel Daftar Barang -->
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -27,93 +30,69 @@
                     <tr id="row-{{ $item->id_barang }}">
                         <td>{{ $item->id_barang }}</td>
                         <td>
-                            <span class="nama_barang_display">{{ $item->nama_barang }}</span>
-                            <input type="text" name="nama_barang" value="{{ $item->nama_barang }}" class="form-control nama_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};" required>
+                            @if (session('edit_id') == $item->id_barang)
+                                <form action="{{ route('barang.update', $item->id_barang) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="nama_barang" value="{{ $item->nama_barang }}"
+                                        class="form-control" required>
+                                @else
+                                    <span>{{ $item->nama_barang }}</span>
+                            @endif
                         </td>
                         <td>
-                            <span class="jenis_barang_display">{{ $item->jenis_barang }}</span>
-                            <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control jenis_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};" required>
+                            @if (session('edit_id') == $item->id_barang)
+                                <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}"
+                                    class="form-control" required>
+                            @else
+                                <span>{{ $item->jenis_barang }}</span>
+                            @endif
                         </td>
                         <td>
-                            <span class="deskripsi_barang_display">{{ $item->deskripsi_barang }}</span>
-                            <input type="text" name="deskripsi_barang" value="{{ $item->deskripsi_barang }}" class="form-control deskripsi_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};">
+                            @if (session('edit_id') == $item->id_barang)
+                                <input type="text" name="deskripsi_barang" value="{{ $item->deskripsi_barang }}"
+                                    class="form-control">
+                            @else
+                                <span>{{ $item->deskripsi_barang }}</span>
+                            @endif
                         </td>
                         <td>
                             @if ($item->qr_code_path)
                                 <img src="{{ asset($item->qr_code_path) }}" alt="QR Code" width="100">
                                 <br>
-                                <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}" class="btn btn-primary btn-sm mt-2">
-                                    Download QR Code
-                                </a>
+                                <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}"
+                                    class="btn btn-primary btn-sm mt-2">Download QR Code</a>
                             @else
                                 Tidak ada QR Code
                             @endif
                         </td>
                         <td>
-                            <button type="button" class="btn btn-warning btn-sm btn-edit" onclick="enableEdit(this, '{{ $item->id_barang }}')">Edit</button>
-                            <button type="submit" class="btn btn-success btn-sm nama_barang_edit_form" style="display: {{ session('edit_id') == $item->id_barang ? 'block' : 'none' }};">Simpan</button>
-                            </form>
-                            <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
-                            </form>
+                            @if (session('edit_id') == $item->id_barang)
+                                <button type="submit" class="btn btn-success btn-sm">Simpan</button>
+                                </form>
+                                <form action="{{ route('barang.cancel_edit', $item->id_barang) }}" method="POST"
+                                    style="display: inline;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-secondary btn-sm">Batal</button>
+                                </form>
+                            @else
+                                <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST"
+                                    style="display: inline;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                                </form>
+                                <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST"
+                                    style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-
-    <script>
-        function enableEdit(button, id_barang) {
-            const row = document.querySelector(`#row-${id_barang}`);
-            
-            // Simpan id_barang yang sedang di-edit ke session
-            @php
-                session(['edit_id' => '{{ $item->id_barang }}']);
-            @endphp;
-
-            // Reset semua baris sebelum mengaktifkan mode edit
-            resetAllRows();
-
-            // Sembunyikan tampilan statis
-            row.querySelectorAll('.nama_barang_display, .jenis_barang_display, .deskripsi_barang_display').forEach(el => {
-                el.style.display = 'none';
-            });
-
-            // Tampilkan form edit
-            row.querySelectorAll('.nama_barang_edit_form, .jenis_barang_edit_form, .deskripsi_barang_edit_form').forEach(el => {
-                el.style.display = 'block';
-            });
-
-            // Fokus pada form input pertama
-            row.querySelector('.nama_barang_edit_form input').focus();
-        }
-
-        function resetAllRows() {
-            // Reset semua baris ke mode tampilan default
-            const rows = document.querySelectorAll('tr');
-            rows.forEach(row => {
-                const displayElements = row.querySelectorAll('.nama_barang_display, .jenis_barang_display, .deskripsi_barang_display');
-                const editForms = row.querySelectorAll('.nama_barang_edit_form, .jenis_barang_edit_form, .deskripsi_barang_edit_form');
-                
-                // Tampilkan elemen display
-                displayElements.forEach(el => {
-                    el.style.display = 'inline';
-                });
-
-                // Sembunyikan elemen edit form
-                editForms.forEach(el => {
-                    el.style.display = 'none';
-                });
-            });
-        }
-
-        // Reset semua baris ke mode tampilan default saat halaman selesai dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            resetAllRows();
-        });
-    </script>
 @endsection

@@ -6,7 +6,6 @@ use App\Http\Controllers\GudangController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DaftarBarangController;
-use App\Http\Controllers\BarcodeController;
 
 // Halaman Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -33,25 +32,17 @@ Route::get('/barang/{id}', [BarangController::class, 'getBarang'])->name('barang
 Route::get('/barang/{id_barang}', [BarangController::class, 'show'])->name('barang.show');
 Route::post('/scan-barcode', [BarangController::class, 'scan']);
 
-//Rute untuk halaman daftar barang
+
+// R U T E   U N T U K   H A L A M A N  D A F T A R  B A R A N G
+// Rute untuk halaman daftar barang
 Route::get('/barang', [DaftarBarangController::class, 'index'])->name('barang.index');
+// Rute untuk mendownload QR Code
 Route::get('/barang/{id_barang}/download', [DaftarBarangController::class, 'downloadQRCode'])->name('barang.downloadQRCode');
-Route::get('/barang/{id_barang}/edit', [BarangController::class, 'edit'])->name('barang.edit');
-// Route::post('/barang/{id_barang}', [BarangController::class, 'update'])->name('barang.update');
+// Rute untuk mengupdate data barang
 Route::put('/barang/{id_barang}', [DaftarBarangController::class, 'update'])->name('barang.update');
+// Rute untuk menghapus barang
 Route::delete('/barang/{id_barang}', [DaftarBarangController::class, 'destroy'])->name('barang.destroy');
-
-Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
-Route::get('/barang/{id_barang}/edit', [BarangController::class, 'edit'])->name('barang.edit');
-// Route::post('/barang/{id_barang}', [BarangController::class, 'update'])->name('barang.update');
-Route::put('/barang/{id_barang}', [DaftarBarangController::class, 'update'])->name('barang.update');
-Route::delete('/barang/{id_barang}', [DaftarBarangController::class, 'destroy'])->name('barang.destroy');
-
-
-
-
-
-
-
-
-
+// Rute untuk mengaktifkan mode edit
+Route::post('/barang/{id}/edit-mode', [DaftarBarangController::class, 'enableEditMode'])->name('barang.edit_mode');
+// Rute untuk Menghapus Session edit_id
+Route::post('/barang/{id}/cancel-edit', [DaftarBarangController::class, 'cancelEdit'])->name('barang.cancel_edit');

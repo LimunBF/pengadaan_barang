@@ -4,34 +4,31 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Barang;
-use Illuminate\Support\Facades\Log; // Tambahkan ini
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Color\Color;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\Label\Label;
-use Endroid\QrCode\Logo\Logo;
-use Endroid\QrCode\RoundBlockSizeMode;
-use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Log;
 
 class DaftarBarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Periksa apakah URL sebelumnya bukan /barang
+        if ($request->headers->get('referer') && parse_url($request->headers->get('referer'), PHP_URL_PATH) !== '/barang') {
+            // Hapus session edit_id
+            session()->forget('edit_id');
+        }
+    
         // Ambil semua data barang
         $barang = Barang::all();
-
+    
         // Kirim data ke view
         return view('daftar_barang.index', compact('barang'));
     }
 
-    public function edit($id_barang)
+    public function enableEditMode($id)
     {
-        $barang = Barang::findOrFail($id_barang);
-        return view('barang.index', compact('barang'));
+        // Simpan ID barang ke dalam session untuk mengaktifkan mode edit
+        session(['edit_id' => $id]);
+        return redirect()->back();
     }
-
 
     public function update(Request $request, $id_barang)
     {
@@ -41,96 +38,69 @@ class DaftarBarangController extends Controller
             'jenis_barang' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
         ]);
-    
+
         // Ambil data barang
         $barang = Barang::findOrFail($id_barang);
-    
-        // Hapus file QR Code lama jika ada
-        $oldQrCodePath = public_path("qr_codes/{$barang->id_barang}.png");
-        if (file_exists($oldQrCodePath)) {
-            unlink($oldQrCodePath);
-        }
-    
-        // Update data barang
+
+        // Update data barang sekaligus kode QR dalam satu operasi
         $barang->update([
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
             'deskripsi_barang' => $request->deskripsi_barang,
-        ]);
-    
-        // Generate QR Code baru
-        $qrCodePath = $this->generateQRCode($barang);
-    
-        // Update QR Code path di database
-        $barang->update([
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
-                'nama_barang' => $barang->nama_barang,
-                'jenis_barang' => $barang->jenis_barang,
-                'deskripsi_barang' => $barang->deskripsi_barang,
+                'nama_barang' => $request->nama_barang,
+                'jenis_barang' => $request->jenis_barang,
+                'deskripsi_barang' => $request->deskripsi_barang ?? '-',
             ]),
-            'qr_code_path' => $qrCodePath,
         ]);
-    
+
+        // Reset session edit_id setelah update
+        session()->forget('edit_id');
+
         return redirect()
             ->route('barang.index')
             ->with('success', 'Barang berhasil diperbarui.');
-    }    
-    
-    public function generateQRCode(Barang $barang)
-    {
-        // Siapkan data untuk QR Code (format JSON)
-        $qrData = json_encode([
-            'id_barang' => $barang->id_barang,
-            'nama_barang' => $barang->nama_barang,
-            'jenis_barang' => $barang->jenis_barang,
-            'deskripsi_barang' => $barang->deskripsi_barang ?? '-',
-        ]);
-
-        // Buat direktori untuk menyimpan QR Code jika belum ada
-        if (!is_dir(public_path('qr_codes'))) {
-            mkdir(public_path('qr_codes'), 0755, true);
-        }
-
-        // Tentukan lokasi file QR Code
-        $filePath = public_path("qr_codes/{$barang->id_barang}.png");
-
-        // Gunakan Endroid QR Code untuk membangun QR Code
-        $qrCode = new QrCode(
-            data: $qrData,
-            encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 300,
-            margin: 10,
-            roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            foregroundColor: new Color(0, 0, 0),
-            backgroundColor: new Color(255, 255, 255)
-        );
-
-        $writer = new PngWriter();
-        $writer->write($qrCode)->saveToFile($filePath);
-
-        // Kembalikan URL path gambar QR Code
-        return asset("qr_codes/{$barang->id_barang}.png");
     }
-
 
     public function destroy($id_barang)
     {
         $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
+
+        // Hapus file QR Code terkait barang jika ada
+        $qrCodePath = public_path("qr_codes/{$barang->id_barang}.png");
+        if (file_exists($qrCodePath)) {
+            unlink($qrCodePath);
+        }
+
         $barang->delete();
 
         return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
     }
 
-
+    public function cancelEdit($id)
+    {
+        // Periksa apakah barang ada (opsional jika tidak diperlukan, bisa dihapus)
+        $barang = Barang::find($id);
+        if (!$barang) {
+            return redirect()->route('barang.index')->with('error', 'Data barang tidak ditemukan.');
+        }
+    
+        // Hapus session edit_id
+        session()->forget('edit_id');
+    
+        // Kembalikan ke halaman daftar barang
+        return redirect()->route('barang.index');
+    }
+    
+    
     public function downloadQRCode($id_barang)
     {
         try {
             // Cari barang berdasarkan id_barang
             $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
 
-            // Lokasi file QR Code berdasarkan data barang
+            // Lokasi file QR Code berdasarkan id_barang
             $filePath = public_path("qr_codes/{$id_barang}.png");
 
             // Logging untuk debugging
@@ -149,5 +119,5 @@ class DaftarBarangController extends Controller
             Log::error("Error downloading QR Code: {$e->getMessage()}");
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mendownload QR Code.');
         }
-    }   
+    }
 }
