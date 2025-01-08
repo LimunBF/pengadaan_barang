@@ -1,9 +1,11 @@
 @extends('layouts.app')
-
 @section('title', 'Dashboard')
-
 @section('content')
 <div class="container">
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
     <h2>Form Pengambilan dan Penerimaan Barang</h2>
     <a href="{{ route('barang.create') }}" class="btn btn-success float-end">Tambah Barang</a>
 

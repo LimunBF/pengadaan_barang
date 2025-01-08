@@ -6,6 +6,7 @@ use App\Http\Controllers\GudangController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DaftarBarangController;
+use App\Http\Controllers\AuthController;
 
 // Halaman Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -46,3 +47,13 @@ Route::delete('/barang/{id_barang}', [DaftarBarangController::class, 'destroy'])
 Route::post('/barang/{id}/edit-mode', [DaftarBarangController::class, 'enableEditMode'])->name('barang.edit_mode');
 // Rute untuk Menghapus Session edit_id
 Route::post('/barang/{id}/cancel-edit', [DaftarBarangController::class, 'cancelEdit'])->name('barang.cancel_edit');
+
+
+//LOGIN LOGOUT RUTE
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Halaman dashboard
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
