@@ -29,6 +29,25 @@ class Barang extends Model
         'deskripsi_barang',
         'kode_qr',
         'qr_code_path',
-        'foto_barang', // Kolom baru untuk path foto barang
+        'foto_barang', // Path untuk foto barang
+        'kondisi',     // Kolom untuk status barang ('ada' atau 'dihapus')
     ];
+
+    // Scope untuk barang yang masih aktif (kondisi 'ada')
+    public function scopeAktif($query)
+    {
+        return $query->where('kondisi', 'ada');
+    }
+
+    // Scope untuk barang yang dihapus (kondisi 'dihapus')
+    public function scopeDihapus($query)
+    {
+        return $query->where('kondisi', 'dihapus');
+    }
+
+    // Custom accessor untuk kondisi (opsional jika ingin memberikan deskripsi lebih)
+    public function getKondisiLabelAttribute()
+    {
+        return $this->kondisi === 'ada' ? 'Tersedia' : 'Telah Dihapus';
+    }
 }

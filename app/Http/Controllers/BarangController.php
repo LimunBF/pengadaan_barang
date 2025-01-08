@@ -151,6 +151,7 @@ class BarangController extends Controller
             'jenis_barang' => $request->jenis_barang,
             'deskripsi_barang' => $request->deskripsi_barang,
             'foto_barang' => $fotoUrl,
+            'kondisi' => 'ada', // Tambahkan nilai default
         ]);
 
         // Generate QR Code dan simpan path-nya
@@ -180,11 +181,11 @@ class BarangController extends Controller
 
     public function getBarang($id_barang)
     {
-        $barang = Barang::where('id_barang', $id_barang)->first();
+        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
 
         // Jika data tidak ditemukan, kembalikan pesan error
         if (!$barang) {
-            return response()->json(['error' => 'Data barang tidak ditemukan'], 404);
+            return response()->json(['error' => 'Data barang tidak ditemukan atau telah dihapus'], 404);
         }
 
         // Kembalikan data barang dalam format JSON
@@ -230,7 +231,7 @@ class BarangController extends Controller
     public function show($id_barang)
     {
         // Ambil data barang berdasarkan ID
-        $barang = Barang::findOrFail($id_barang);
+        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->firstOrFail();
 
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
