@@ -36,6 +36,16 @@ Route::post('/scan-barcode', [BarangController::class, 'scan']);
 //Rute untuk halaman daftar barang
 Route::get('/barang', [DaftarBarangController::class, 'index'])->name('barang.index');
 Route::get('/barang/{id_barang}/download', [DaftarBarangController::class, 'downloadQRCode'])->name('barang.downloadQRCode');
+Route::get('/barang/{id_barang}/edit', [BarangController::class, 'edit'])->name('barang.edit');
+// Route::post('/barang/{id_barang}', [BarangController::class, 'update'])->name('barang.update');
+Route::put('/barang/{id_barang}', [DaftarBarangController::class, 'update'])->name('barang.update');
+Route::delete('/barang/{id_barang}', [DaftarBarangController::class, 'destroy'])->name('barang.destroy');
+
+Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+Route::get('/barang/{id_barang}/edit', [BarangController::class, 'edit'])->name('barang.edit');
+// Route::post('/barang/{id_barang}', [BarangController::class, 'update'])->name('barang.update');
+Route::put('/barang/{id_barang}', [DaftarBarangController::class, 'update'])->name('barang.update');
+Route::delete('/barang/{id_barang}', [DaftarBarangController::class, 'destroy'])->name('barang.destroy');
 
 
 

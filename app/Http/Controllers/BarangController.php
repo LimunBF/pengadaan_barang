@@ -16,15 +16,14 @@ class BarangController extends Controller
 {
     public function create()
     {
-        // Ambil barang terakhir berdasarkan ID Barang
-        $lastBarang = Barang::orderBy('id_barang', 'desc')->first();
-
-        // Hitung ID Barang berikutnya
-        $nextId = $lastBarang ? str_pad((int) substr($lastBarang->id_barang, -4) + 1, 4, '0', STR_PAD_LEFT) : '0001';
-
+        do {
+            // Generate angka acak 4 digit
+            $nextId = str_pad(random_int(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (Barang::where('id_barang', $nextId)->exists()); // Periksa apakah ID sudah ada di database
+    
         // Kirim data ke view create.blade.php
         return view('barang.create', compact('nextId'));
-    }
+    }    
 
     public function generateQRCode(Barang $barang)
     {
@@ -33,9 +32,9 @@ class BarangController extends Controller
             'id_barang' => $barang->id_barang,
             'nama_barang' => $barang->nama_barang,
             'jenis_barang' => $barang->jenis_barang,
-            'deskripsi_barang' => $barang->deskripsi_barang,
-        ]);
-
+            'deskripsi_barang' => $barang->deskripsi_barang ?? '-', // Kosong jika null
+        ]);        
+    
         // Buat direktori jika belum ada
         if (!is_dir(public_path('qr_codes'))) {
             mkdir(public_path('qr_codes'), 0755, true);
@@ -71,7 +70,7 @@ class BarangController extends Controller
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
-            'deskripsi_barang' => 'required|string',
+            'deskripsi_barang' => 'nullable|string',
         ]);
 
         // Simpan data barang
