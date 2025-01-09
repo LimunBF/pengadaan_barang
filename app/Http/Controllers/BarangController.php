@@ -126,15 +126,13 @@ class BarangController extends Controller
         imagedestroy($image);
         imagedestroy($newImage);
     }    
-    
 
     public function store(Request $request)
     {
         $request->validate([
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
-            'jenis_barang' => 'required|string|max:255',
-            'deskripsi_barang' => 'nullable|string',
+            'jenis_barang' => 'nullable|string|max:255',
             'foto_barang' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -149,8 +147,8 @@ class BarangController extends Controller
             'id_barang' => $request->id_barang,
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
-            'deskripsi_barang' => $request->deskripsi_barang,
             'foto_barang' => $fotoUrl,
+            'kondisi' => 'ada', // Tambahkan nilai default
         ]);
 
         // Generate QR Code dan simpan path-nya
@@ -162,7 +160,6 @@ class BarangController extends Controller
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $barang->nama_barang,
                 'jenis_barang' => $barang->jenis_barang,
-                'deskripsi_barang' => $barang->deskripsi_barang,
             ]),
             'qr_code_path' => $qrCodePath,
         ]);
@@ -180,11 +177,11 @@ class BarangController extends Controller
 
     public function getBarang($id_barang)
     {
-        $barang = Barang::where('id_barang', $id_barang)->first();
+        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
 
         // Jika data tidak ditemukan, kembalikan pesan error
         if (!$barang) {
-            return response()->json(['error' => 'Data barang tidak ditemukan'], 404);
+            return response()->json(['error' => 'Data barang tidak ditemukan atau telah dihapus'], 404);
         }
 
         // Kembalikan data barang dalam format JSON
@@ -230,7 +227,7 @@ class BarangController extends Controller
     public function show($id_barang)
     {
         // Ambil data barang berdasarkan ID
-        $barang = Barang::findOrFail($id_barang);
+        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->firstOrFail();
 
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));

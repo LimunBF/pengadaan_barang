@@ -22,7 +22,7 @@ Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi
 Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 
- 
+
 Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
 
 // Rute untuk halaman barang
