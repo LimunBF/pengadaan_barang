@@ -58,7 +58,7 @@
                             @if (session('edit_id') == $item->id_barang)
                                 <div>
                                     @if ($item->foto_barang)
-                                        <img id="preview-{{ $item->id_barang }}" src="{{ $item->foto_barang }}" alt="Gambar Barang" width="100" class="mb-2">
+                                        <img id="preview-{{ $item->id_barang }}" src="{{ $item->foto_barang }}" alt="Gambar Barang" width="100" class="mb-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#photoModal" data-bs-whatever="{{ asset($item->foto_barang) }}">
                                     @else
                                         <img id="preview-{{ $item->id_barang }}" src="#" alt="Gambar Barang" width="100" class="mb-2" style="display: none;">
                                     @endif
@@ -66,7 +66,7 @@
                                 <input type="file" name="foto_barang" class="form-control" onchange="previewImage(this, 'preview-{{ $item->id_barang }}')">
                             @else
                                 @if ($item->foto_barang)
-                                <img src="{{ $item->foto_barang }}?{{ time() }}" alt="Gambar Barang" width="100">
+                                    <img src="{{ $item->foto_barang }}?{{ time() }}" alt="Gambar Barang" width="100" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#photoModal" data-bs-whatever="{{ asset($item->foto_barang) }}">
                                 @else
                                     Tidak ada gambar
                                 @endif
@@ -74,13 +74,21 @@
                         </td>
                         <td>
                             @if ($item->qr_code_path)
-                                <img src="{{ asset($item->qr_code_path) }}" alt="QR Code" width="100">
-                                <br>
-                                <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}" class="btn btn-primary btn-sm mt-2">Download QR Code</a>
+                                <!-- Gambar QR Code -->
+                                <img src="{{ asset($item->qr_code_path) }}" alt="QR Code" width="100" style="cursor: pointer;" 
+                                    data-bs-toggle="modal" data-bs-target="#qrModal" 
+                                    data-bs-id="{{ $item->id_barang }}" 
+                                    data-bs-image="{{ asset($item->qr_code_path) }}">
+                                
+                                <!-- Tombol Download QR Code -->
+                                @if ($item->kondisi != 'dihapus')
+                                    <br>
+                                    <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}" class="btn btn-primary btn-sm mt-2">Download QR Code</a>
+                                @endif
                             @else
                                 Tidak ada QR Code
                             @endif
-                        </td>
+                        </td>                        
                         <td class="text-center">
                             <div class="btn-group-vertical w-100">
                                 @if (session('edit_id') == $item->id_barang)
@@ -110,6 +118,40 @@
             </tbody>
         </table>        
     </div>
+
+    <!-- Modal untuk menampilkan gambar QR Code -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrModalLabel">QR Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex flex-column align-items-center">
+                    <!-- Gambar QR Code -->
+                    <img id="qrModalImage" src="" class="img-fluid mb-3" alt="QR Code">
+                    <!-- Tombol Download QR Code -->
+                    <a id="qrDownloadButton" href="#" class="btn btn-primary">Download QR Code</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal untuk menampilkan gambar Barang -->
+    <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="photoModalLabel">Foto Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex justify-content-center align-items-center">
+                    <img id="photoModalImage" src="" class="img-fluid" alt="Foto Barang">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -130,5 +172,29 @@
             preview.style.display = "none";
         }
     }
+    // Menangani klik pada gambar QR Code dan foto barang
+    const qrModal = document.getElementById('qrModal');
+    qrModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Tombol yang memicu modal
+        const imageUrl = button.getAttribute('data-bs-image'); // URL gambar QR Code
+        const itemId = button.getAttribute('data-bs-id'); // ID barang
+
+        const modalImage = qrModal.querySelector('#qrModalImage');
+        const downloadButton = qrModal.querySelector('#qrDownloadButton');
+
+        // Update gambar di modal
+        modalImage.src = imageUrl;
+
+        // Update URL tombol download menggunakan route Laravel
+        downloadButton.href = `/barang/${itemId}/download-qr`;
+    });
+
+    const photoModal = document.getElementById('photoModal');
+    photoModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Tombol yang memicu modal
+        const imageUrl = button.getAttribute('data-bs-whatever'); // Ambil URL gambar dari atribut data-bs-whatever
+        const modalImage = photoModal.querySelector('.modal-body img');
+        modalImage.src = imageUrl; // Set gambar ke modal
+    });
 </script>
 @endpush
