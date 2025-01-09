@@ -10,13 +10,13 @@
         <div class="d-grid gap-4">
             <button 
                 class="btn btn-primary fw-bold shadow-sm" 
-                style="border-radius: 30px; height: 150px; font-size: 2.5rem;" 
+                style="border-radius: 30px; height: 125px; font-size: 2rem;" 
                 onclick="startQrScanner()">
                 <i class="bi bi-upc-scan me-2"></i> Scan QR Code
             </button>
             <button 
                 class="btn btn-success fw-bold shadow-sm" 
-                style="border-radius: 30px; height: 150px; font-size: 2.5rem;" 
+                style="border-radius: 30px; height: 125px; font-size: 2rem;" 
                 onclick="window.location.href='{{ route('barang.create') }}'">
                 <i class="bi bi-plus-circle me-2"></i> Tambah Barang
             </button>
@@ -35,6 +35,12 @@
                 id="take-photo-btn" 
                 class="btn btn-primary" 
                 onclick="takePhoto()">Ambil Gambar</button>
+            <input 
+                type="file" 
+                id="upload-file-input" 
+                class="form-control" 
+                accept="image/*" 
+                onchange="uploadFile()">
             <button 
                 class="btn btn-danger" 
                 onclick="stopQrScanner()">Batal</button>
@@ -61,6 +67,7 @@
     let scannerContainer = document.getElementById('scanner-container');
     let processButtonContainer = document.getElementById('process-button-container');
     let takePhotoButton = document.getElementById('take-photo-btn');
+    let uploadFileInput = document.getElementById('upload-file-input');
     let videoStream = null;
     let photoTaken = false; // Flag untuk mengontrol pengambilan gambar
 
@@ -68,6 +75,7 @@
         // Reset flag dan tampilan
         photoTaken = false;
         takePhotoButton.disabled = false;
+        uploadFileInput.disabled = false;
         canvasElement.style.display = 'none'; // Sembunyikan canvas
         videoElement.style.display = 'block'; // Tampilkan video
 
@@ -124,9 +132,9 @@
         // Tampilkan tombol proses
         processButtonContainer.classList.remove('d-none');
         takePhotoButton.disabled = true; // Disable tombol "Ambil Gambar"
+        uploadFileInput.disabled = true; // Disable tombol "Unggah Gambar"
         photoTaken = true; // Tandai bahwa gambar sudah diambil
 
-        // Notifikasi sukses
         Swal.fire({
             icon: 'success',
             title: 'Gambar Berhasil Diambil',
@@ -134,36 +142,55 @@
         });
     }
 
-    function stopQrScanner() {
-        // Hentikan kamera
+    function uploadFile() {
+        const file = uploadFileInput.files[0];
+        if (!file) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Tidak Dipilih',
+                text: 'Silakan pilih file gambar terlebih dahulu.',
+            });
+            return;
+        }
+
+        // Berhenti streaming kamera jika sedang aktif
         if (videoStream) {
             videoStream.getTracks().forEach(track => track.stop());
             videoStream = null;
+            videoElement.srcObject = null;
         }
-        videoElement.srcObject = null;
 
-        // Kembalikan ke tombol awal
-        buttonCard.classList.remove('d-none');
-        scannerContainer.classList.add('d-none');
-        videoElement.style.display = 'block'; // Reset ke live kamera
-        canvasElement.style.display = 'none'; // Sembunyikan hasil tangkapan
-        processButtonContainer.classList.add('d-none'); // Sembunyikan tombol proses
-        photoTaken = false; // Reset flag
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const image = new Image();
+            image.onload = function() {
+                // Tampilkan gambar hasil upload di canvas
+                const context = canvasElement.getContext('2d');
+                canvasElement.width = image.width;
+                canvasElement.height = image.height;
+                context.drawImage(image, 0, 0, canvasElement.width, canvasElement.height);
+
+                // Sembunyikan video, tampilkan canvas
+                videoElement.style.display = 'none';
+                canvasElement.style.display = 'block';
+
+                // Tampilkan tombol proses
+                processButtonContainer.classList.remove('d-none');
+                takePhotoButton.disabled = true; // Disable tombol "Ambil Gambar"
+                uploadFileInput.disabled = true; // Disable tombol "Unggah Gambar"
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'File Berhasil Diunggah',
+                    text: 'Silakan klik tombol "Proses" untuk melanjutkan.',
+                });
+            };
+            image.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 
-    function processScan() {
-        // Kirim hasil scan ke server untuk diproses
-        Swal.fire({
-            icon: 'info',
-            title: 'Memproses Hasil Scan...',
-            text: 'Silakan tunggu sementara kami memproses data Anda.',
-            timer: 2000,
-            showConfirmButton: false,
-        }).then(() => {
-            // Alihkan ke halaman berikutnya atau proses data QR
-            window.location.href = '/proses-scan'; // Ganti dengan rute yang sesuai
-        });
-    }
+
     function processScan() {
         const photoCanvas = document.getElementById('photo-canvas');
         const photoDataUrl = photoCanvas.toDataURL('image/png'); // Ambil gambar dari canvas
@@ -173,47 +200,39 @@
         const blob = dataURLtoBlob(photoDataUrl);
         formData.append('qr_image', blob, 'qr-code.png');
 
-        Swal.fire({
-            icon: 'info',
-            title: 'Memproses Hasil Scan...',
-            text: 'Silakan tunggu sementara kami memproses data Anda.',
-            timer: 2000,
-            showConfirmButton: false,
-        }).then(() => {
-            fetch('{{ route('proses.scan') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: data.message,
-                        }).then(() => {
-                            window.location.href = '/barang/' + data.data.id_barang; // Ganti dengan rute detail barang
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: data.message,
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+        fetch('{{ route('proses.scan') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message,
+                    }).then(() => {
+                        window.location.href = '/barang/' + data.data.id_barang; // Ganti dengan rute detail barang
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Terjadi Kesalahan',
-                        text: 'Tidak dapat memproses hasil scan.',
+                        title: 'Gagal',
+                        text: data.message,
                     });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: 'Tidak dapat memproses hasil scan.',
                 });
-        });
+            });
     }
 
     function dataURLtoBlob(dataURL) {
@@ -227,6 +246,28 @@
         }
 
         return new Blob([ab], { type: mimeString });
+    }
+
+    function stopQrScanner() {
+        // Berhenti streaming kamera jika sedang aktif
+        if (videoStream) {
+            videoStream.getTracks().forEach((track) => track.stop());
+            videoStream = null;
+        }
+        videoElement.srcObject = null;
+
+        // Reset unggahan file
+        uploadFileInput.value = ""; // Kosongkan input file
+
+        // Kembalikan ke tampilan awal
+        buttonCard.classList.remove('d-none');
+        scannerContainer.classList.add('d-none');
+        videoElement.style.display = 'block';
+        canvasElement.style.display = 'none';
+        processButtonContainer.classList.add('d-none');
+        photoTaken = false;
+        takePhotoButton.disabled = false;
+        uploadFileInput.disabled = false;
     }
 
 </script>
