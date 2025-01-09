@@ -14,7 +14,7 @@
 
     <form action="{{ route('barang.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="form-group">
+        <div class="form-group">    
             <label for="id_barang">ID Barang</label>
             <input type="text" class="form-control" id="id_barang" name="id_barang" value="{{ $nextId }}" readonly required>
         </div>
