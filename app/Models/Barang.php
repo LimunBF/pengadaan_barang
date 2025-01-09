@@ -26,7 +26,6 @@ class Barang extends Model
         'id_barang',
         'nama_barang',
         'jenis_barang',
-        'deskripsi_barang',
         'kode_qr',
         'qr_code_path',
         'foto_barang', // Path untuk foto barang

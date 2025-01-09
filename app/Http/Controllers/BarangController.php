@@ -136,6 +136,8 @@ class BarangController extends Controller
             'foto_barang' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        $jenis_barang = !empty($request->jenis_barang) ? $request->jenis_barang : 'tidak-ada';  // Jika tidak diisi, akan default ke '-'
+
         // Simpan foto barang ke folder 'barang_photos'
         if ($request->hasFile('foto_barang')) {
             $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
@@ -146,7 +148,7 @@ class BarangController extends Controller
         $barang = Barang::create([
             'id_barang' => $request->id_barang,
             'nama_barang' => $request->nama_barang,
-            'jenis_barang' => $request->jenis_barang,
+            'jenis_barang' => $jenis_barang,
             'foto_barang' => $fotoUrl,
             'kondisi' => 'ada', // Tambahkan nilai default
         ]);
@@ -159,7 +161,7 @@ class BarangController extends Controller
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $barang->nama_barang,
-                'jenis_barang' => $barang->jenis_barang,
+                'jenis_barang' => $jenis_barang,
             ]),
             'qr_code_path' => $qrCodePath,
         ]);
