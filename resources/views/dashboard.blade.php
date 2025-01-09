@@ -45,10 +45,6 @@
             <label for="jenis_barang" class="form-label">Jenis Barang</label>
             <input type="text" id="jenis_barang" name="jenis_barang" class="form-control" readonly>
         </div>
-        <div class="mb-3">
-            <label for="deskripsi_barang" class="form-label">Deskripsi Barang</label>
-            <textarea id="deskripsi_barang" name="deskripsi_barang" class="form-control" rows="3" readonly></textarea>
-        </div>
 
         <div class="mb-3">
             <label for="kuantitas" class="form-label">Kuantitas</label>
@@ -57,7 +53,11 @@
 
         <div class="mb-3">
             <label for="nama_pengirim_penerima" class="form-label">Nama Pengirim/Penerima</label>
-            <input type="text" id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-control" required>
+            <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-control" required>
+                <option value="joko">Joko</option>
+                    <option value="rizki">Rizki</option>
+                    <option value="limun">Limun</option>
+                </select>
         </div>
 
         <div class="mb-3">

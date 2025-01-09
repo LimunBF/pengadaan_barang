@@ -36,7 +36,7 @@
         }
         .content-wrapper {
             background: #ffffff;
-            color: #000000;
+            color: #cf1515;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             padding: 30px;
@@ -74,8 +74,14 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('gudang.index') }}">Gudang</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('transaksi.index') }}">Transaksi</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Transaksi
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('transaksi.index') }}">Masuk</a>
+                            <a class="dropdown-item" href="{{ route('transaksi.index') }}">Keluar</a>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -93,6 +99,9 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     @stack('scripts')
 </body>
 </html>
