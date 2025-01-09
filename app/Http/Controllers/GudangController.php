@@ -7,6 +7,7 @@ use App\Models\Gudang; // Import model Gudang
 
 class GudangController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      */
@@ -37,8 +38,10 @@ class GudangController extends Controller
             'id_barang' => 'required|string|max:50|unique:gudang,id_barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
+            'lokasi_rak' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
             'stok' => 'required|integer|min:0',
+            'satuan' => 'nullable|string',
         ]);
 
         // Simpan data ke tabel gudang
@@ -52,6 +55,11 @@ class GudangController extends Controller
      */
     public function show(string $id)
     {
+        $stok_gudang = Gudang::table('gudang')->value('stok');
+    
+        // Kirim stok ke tampilan
+        return view('form-view', compact('stok_gudang'));
+
         $gudang = Gudang::findOrFail($id);
 
         return view('gudang.show', compact('gudang'));
@@ -74,10 +82,13 @@ class GudangController extends Controller
     {
         // Validasi data
         $request->validate([
+          'id_barang' => 'required|string|max:50|unique:gudang,id_barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
+            'lokasi_rak' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
             'stok' => 'required|integer|min:0',
+            'satuan' => 'nullable|string',
         ]);
 
         // Update data di tabel gudang

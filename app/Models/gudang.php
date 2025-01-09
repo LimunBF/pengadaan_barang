@@ -19,8 +19,10 @@ class Gudang extends Model
         'id_barang',
         'nama_barang',
         'jenis_barang',
+        'lokasi_rak',
         'deskripsi_barang',
         'stok',
+        'satuan',
         'created_at',
         'updated_at',
     ];

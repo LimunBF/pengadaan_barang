@@ -47,9 +47,15 @@
         </div>
 
         <div class="mb-3">
-            <label for="kuantitas" class="form-label">Kuantitas</label>
-            <input type="number" id="kuantitas" name="kuantitas" class="form-control" min="1" required>
+            <label for="kuantitas" class="form-label">Stok Saat Ini  </label>
+            <input type="number" id="kuantitas" name="kuantitas" class="form-control" value="{{ $stok_gudang ?? '' }}" min="1" required>
         </div>
+        
+        <div class="mb-3">
+            <label for="lokasi_rak" class="form-label">Lokasi Rak</label>
+            <input type="text" id="lokasi_rak" name="lokasi_rak" class="form-control" placeholder="Masukkan lokasi rak" required>
+        </div>
+        
 
         <div class="mb-3">
             <label for="nama_pengirim_penerima" class="form-label">Nama Pengirim/Penerima</label>

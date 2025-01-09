@@ -11,7 +11,9 @@
             <th style="text-align: center;">ID Barang</th>
             <th style="text-align: center;">Nama Barang</th>
             <th style="text-align: center;">Jenis Barang</th>
+            <th style="text-align: center;">Lokasi Rak</th>
             <th style="text-align: center;">Stok</th>
+            <th style="text-align: center;">satuan</th>
         </tr>
     </thead>
     <tbody>
@@ -20,7 +22,9 @@
             <td style="text-align: center;">{{ $barang['id_barang'] }}</td>
             <td>{{ $barang['nama_barang'] }}</td>
             <td>{{ $barang['jenis_barang'] }}</td>
+            <td>{{ $barang['lokasi_rak'] }}</td>
             <td style="text-align: center;">{{ $barang['stok'] }}</td>
+            <td style="text-align: center;">{{ $barang['satuan'] }}</td>
         </tr>
         @empty
         <tr>

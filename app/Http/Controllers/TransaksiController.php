@@ -33,6 +33,7 @@ class TransaksiController extends Controller
             'id_barang' => 'required|string|max:50',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
+            'lokasi_rak' => 'required|string|max:255',
             'deskripsi_barang' => 'nullable|string',
             'kuantitas' => 'required|integer|min:1',
             'nama_pengirim_penerima' => 'required|string|max:255',
@@ -43,6 +44,7 @@ class TransaksiController extends Controller
         $id_barang = $request->input('id_barang');
         $nama_barang = $request->input('nama_barang');
         $jenis_barang = $request->input('jenis_barang');
+        $lokasi_rak = $request->input('lokasi_rak');
         $deskripsi_barang = $request->input('deskripsi_barang');
         $kuantitas = $request->input('kuantitas');
         $nama_pengirim_penerima = $request->input('nama_pengirim_penerima');
@@ -64,6 +66,7 @@ class TransaksiController extends Controller
                     'id_barang' => $id_barang,
                     'nama_barang' => $nama_barang,
                     'jenis_barang' => $jenis_barang,
+                    'lokasi_rak'=>$lokasi_rak,
                     'deskripsi_barang' => $deskripsi_barang,
                     'stok' => $kuantitas,
                     'created_at' => now(),
