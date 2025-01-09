@@ -8,10 +8,14 @@
     <title>@yield('title') - Pengelolaan Gudang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
+       html, body {
             background: linear-gradient(to right, #6a11cb, #2575fc);
             color: #ffffff;
             font-family: Arial, sans-serif;
+            height: 100%; /* Pastikan body dan html memiliki tinggi 100% */
+    margin: 0; /* Hilangkan margin bawaan */
+    display: flex; /* Gunakan Flexbox */
+    flex-direction: column; 
         }
         .navbar {
             background: rgba(0, 0, 0, 0.8);
@@ -38,16 +42,19 @@
             padding: 30px;
             margin-top: 30px;
             margin-bottom: 30px;
+            flex: 1;
         }
         footer {
-            text-align: center;
-            padding: 15px 0;
-            background: rgba(0, 0, 0, 0.8);
-            color: #ffffff;
-        }
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    text-align: center;
+    padding: 15px 0;
+    width: 100%;
+}
         footer p {
             margin: 0;
         }
+        
     </style>
 </head>
 <body>
