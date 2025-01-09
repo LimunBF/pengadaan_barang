@@ -48,6 +48,15 @@
         footer p {
             margin: 0;
         }
+        .table-secondary {
+            background-color: #f0f0f0 !important;
+            color: #6c757d;
+        }
+
+        .table-secondary .btn {
+            pointer-events: none;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>

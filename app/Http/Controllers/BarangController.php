@@ -126,15 +126,13 @@ class BarangController extends Controller
         imagedestroy($image);
         imagedestroy($newImage);
     }    
-    
 
     public function store(Request $request)
     {
         $request->validate([
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
-            'jenis_barang' => 'required|string|max:255',
-            'deskripsi_barang' => 'nullable|string',
+            'jenis_barang' => 'nullable|string|max:255',
             'foto_barang' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -149,7 +147,6 @@ class BarangController extends Controller
             'id_barang' => $request->id_barang,
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
-            'deskripsi_barang' => $request->deskripsi_barang,
             'foto_barang' => $fotoUrl,
             'kondisi' => 'ada', // Tambahkan nilai default
         ]);
@@ -163,7 +160,6 @@ class BarangController extends Controller
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $barang->nama_barang,
                 'jenis_barang' => $barang->jenis_barang,
-                'deskripsi_barang' => $barang->deskripsi_barang,
             ]),
             'qr_code_path' => $qrCodePath,
         ]);

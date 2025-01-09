@@ -11,8 +11,7 @@ class CreateBarangTable extends Migration
         Schema::create('barang', function (Blueprint $table) {
             $table->string('id_barang', 50)->primary();
             $table->string('nama_barang', 255);
-            $table->string('jenis_barang', 255);
-            $table->text('deskripsi_barang')->nullable();
+            $table->string('jenis_barang', 255)->nullable();
             $table->text('kode_qr')->nullable(); // Menyimpan JSON data
             $table->string('qr_code_path', 255)->nullable(); // Path untuk gambar QR Code
             $table->string('foto_barang', 255)->nullable(); // Path untuk foto barang

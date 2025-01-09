@@ -24,11 +24,7 @@
         </div>
         <div class="form-group">
             <label for="jenis_barang">Jenis Barang</label>
-            <input type="text" class="form-control" id="jenis_barang" name="jenis_barang" required>
-        </div>
-        <div class="form-group">
-            <label for="deskripsi_barang">Deskripsi Barang</label>
-            <textarea class="form-control" id="deskripsi_barang" name="deskripsi_barang" rows="4"></textarea>
+            <input type="text" class="form-control" id="jenis_barang" name="jenis_barang">
         </div>
         <div class="form-group">
             <label for="foto_barang">Foto Barang</label>

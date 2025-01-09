@@ -36,8 +36,7 @@ class DaftarBarangController extends Controller
         // Validasi input
         $request->validate([
             'nama_barang' => 'required|string|max:255',
-            'jenis_barang' => 'required|string|max:255',
-            'deskripsi_barang' => 'nullable|string',
+            'jenis_barang' => 'nullable|string|max:255',
             'foto_barang' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi untuk gambar
         ]);
 
@@ -48,12 +47,10 @@ class DaftarBarangController extends Controller
         $dataUpdate = [
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
-            'deskripsi_barang' => $request->deskripsi_barang,
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $request->nama_barang,
                 'jenis_barang' => $request->jenis_barang,
-                'deskripsi_barang' => $request->deskripsi_barang ?? '-',
             ]),
         ];
 
@@ -96,18 +93,19 @@ class DaftarBarangController extends Controller
 
     public function destroy($id_barang)
     {
+        // Cari barang berdasarkan ID
         $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-
-        // Hapus file QR Code terkait barang jika ada
-        $qrCodePath = public_path("qr_codes/{$barang->id_barang}.png");
-        if (file_exists($qrCodePath)) {
-            unlink($qrCodePath);
-        }
-
-        $barang->delete();
-
-        return redirect()->back()->with('success', 'Data barang berhasil dihapus.');
-    }
+    
+        // Update kolom kondisi menjadi 'dihapus'
+        $barang->update([
+            'kondisi' => 'dihapus',
+        ]);
+    
+        // Pesan sukses
+        return redirect()
+            ->back()
+            ->with('success', 'Barang berhasil diubah kondisinya menjadi dihapus.');
+    }    
 
     public function cancelEdit($id)
     {

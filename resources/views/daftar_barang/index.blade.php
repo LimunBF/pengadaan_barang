@@ -20,7 +20,6 @@
                 <option value="dihapus" {{ $filter == 'dihapus' ? 'selected' : '' }}>Dihapus</option>
             </select>
         </form>
-        
 
         <!-- Tabel Daftar Barang -->
         <table class="table table-bordered">
@@ -29,7 +28,6 @@
                     <th>ID Barang</th>
                     <th>Nama Barang</th>
                     <th>Jenis Barang</th>
-                    <th>Deskripsi Barang</th>
                     <th>Gambar</th>
                     <th>QR Code</th>
                     <th>Aksi</th>
@@ -37,7 +35,7 @@
             </thead>
             <tbody>
                 @foreach ($barang as $item)
-                    <tr id="row-{{ $item->id_barang }}">
+                    <tr id="row-{{ $item->id_barang }}" @if($item->kondisi == 'dihapus') class="text-muted" @endif>
                         <td>{{ $item->id_barang }}</td>
                         <td>
                             @if (session('edit_id') == $item->id_barang)
@@ -54,13 +52,6 @@
                                 <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control" required>
                             @else
                                 <span>{{ $item->jenis_barang }}</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if (session('edit_id') == $item->id_barang)
-                                <input type="text" name="deskripsi_barang" value="{{ $item->deskripsi_barang }}" class="form-control">
-                            @else
-                                <span>{{ $item->deskripsi_barang }}</span>
                             @endif
                         </td>
                         <td>
@@ -90,25 +81,29 @@
                                 Tidak ada QR Code
                             @endif
                         </td>
-                        <td>
-                            @if (session('edit_id') == $item->id_barang)
-                                <button type="submit" class="btn btn-success btn-sm">Simpan</button>
-                                </form>
-                                <form action="{{ route('barang.cancel_edit', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-secondary btn-sm">Batal</button>
-                                </form>
-                            @else
-                                <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-warning btn-sm">Edit</button>
-                                </form>
-                                <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
-                                </form>
-                            @endif
+                        <td class="text-center">
+                            <div class="btn-group-vertical w-100">
+                                @if (session('edit_id') == $item->id_barang)
+                                    <button type="submit" class="btn btn-success btn-sm">Simpan</button>
+                                    </form>
+                                    <form action="{{ route('barang.cancel_edit', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-secondary btn-sm">Batal</button>
+                                    </form>
+                                @elseif($item->kondisi == 'dihapus')
+                                    <button class="btn btn-light btn-sm w-100" disabled>Barang Dihapus</button>
+                                @else
+                                    <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning btn-sm w-100">Edit</button>
+                                    </form>
+                                    <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 @endforeach
