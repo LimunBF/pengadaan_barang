@@ -7,15 +7,28 @@
     <meta name="author" content="Your Name">
     <title>@yield('title') - Pengelolaan Gudang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
        html, body {
             background: linear-gradient(to right, #6a11cb, #2575fc);
             color: #ffffff;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* Memastikan body memiliki tinggi minimal layar penuh */
             height: 100%; /* Pastikan body dan html memiliki tinggi 100% */
-    margin: 0; /* Hilangkan margin bawaan */
-    display: flex; /* Gunakan Flexbox */
-    flex-direction: column; 
+            display: flex; /* Gunakan Flexbox */
+            flex-direction: column; 
+        }
+        .content-wrapper {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            min-height: calc(110vh - 230px);
         }
         .navbar {
             background: rgba(0, 0, 0, 0.8);
@@ -53,6 +66,20 @@
 }
         footer p {
             margin: 0;
+        }
+        .table-secondary {
+            background-color: #f0f0f0 !important;
+            color: #6c757d;
+        }
+        .table-secondary .btn {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .btn-large {
+            font-size: 1.5rem;
+            padding: 20px 40px;
+            width: 100%;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -102,6 +129,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     @stack('scripts')
 </body>
 </html>

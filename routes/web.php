@@ -7,6 +7,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DaftarBarangController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ScanController;
 
 // Halaman Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -35,7 +36,6 @@ Route::get('/barang/{id}', [BarangController::class, 'getBarang'])->name('barang
 Route::get('/barang/{id_barang}', [BarangController::class, 'show'])->name('barang.show');
 Route::post('/scan-barcode', [BarangController::class, 'scan']);
 
-
 // R U T E   U N T U K   H A L A M A N  D A F T A R  B A R A N G
 // Rute untuk halaman daftar barang
 Route::get('/barang', [DaftarBarangController::class, 'index'])->name('barang.index');
@@ -59,3 +59,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Halaman dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// Rute Untuk Barcode Scanner
+Route::get('/barcode-data', function () {
+    return view('barcode.barcode-data');
+});
+Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');
