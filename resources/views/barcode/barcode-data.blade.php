@@ -51,7 +51,7 @@
                 class="btn btn-success" 
                 onclick="processScan()">Proses</button>
         </div>
-    </div>
+    </div>       
 </div>
 
 {{-- SweetAlert2 --}}
@@ -190,7 +190,6 @@
         reader.readAsDataURL(file);
     }
 
-
     function processScan() {
         const photoCanvas = document.getElementById('photo-canvas');
         const photoDataUrl = photoCanvas.toDataURL('image/png'); // Ambil gambar dari canvas
@@ -214,8 +213,11 @@
                         icon: 'success',
                         title: 'Berhasil',
                         text: data.message,
+                        timer: 2000, // Tampilkan selama 2 detik
+                        showConfirmButton: false,
                     }).then(() => {
-                        window.location.href = '/barang/' + data.data.id_barang; // Ganti dengan rute detail barang
+                        resetScanner(); // Reset elemen setelah scan berhasil
+                        window.location.href = data.redirect_url; // Alihkan ke halaman dashboard
                     });
                 } else {
                     Swal.fire({
@@ -223,6 +225,7 @@
                         title: 'Gagal',
                         text: data.message,
                     });
+                    resetScanner(); // Reset elemen setelah scan gagal
                 }
             })
             .catch((error) => {
@@ -232,6 +235,7 @@
                     title: 'Terjadi Kesalahan',
                     text: 'Tidak dapat memproses hasil scan.',
                 });
+                resetScanner(); // Reset elemen setelah scan gagal
             });
     }
 
@@ -248,7 +252,7 @@
         return new Blob([ab], { type: mimeString });
     }
 
-    function stopQrScanner() {
+    function resetScanner() {
         // Berhenti streaming kamera jika sedang aktif
         if (videoStream) {
             videoStream.getTracks().forEach((track) => track.stop());
@@ -270,6 +274,36 @@
         uploadFileInput.disabled = false;
     }
 
+
+    function stopQrScanner() {
+        // Berhenti streaming kamera jika sedang aktif
+        if (videoStream) {
+            videoStream.getTracks().forEach((track) => track.stop());
+            videoStream = null;
+        }
+        videoElement.srcObject = null;
+
+        // Reset unggahan file
+        uploadFileInput.value = ""; // Kosongkan input file
+
+        // Kembalikan ke tampilan awal
+        buttonCard.classList.remove('d-none');
+        scannerContainer.classList.add('d-none');
+        videoElement.style.display = 'block';
+        canvasElement.style.display = 'none';
+        processButtonContainer.classList.add('d-none');
+        photoTaken = false;
+        takePhotoButton.disabled = false;
+        uploadFileInput.disabled = false;
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Reset',
+            text: 'Semua input telah direset.',
+            timer: 1500,
+            showConfirmButton: false,
+        });
+    }
 </script>
 @endpush
 @endsection

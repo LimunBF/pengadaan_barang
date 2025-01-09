@@ -10,7 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScanController;
 
 // Halaman Dashboard
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
 
 // Halaman Gudang
@@ -56,13 +56,10 @@ Route::post('/barang/{id}/cancel-edit', [DaftarBarangController::class, 'cancelE
 
 
 //LOGIN LOGOUT RUTE
-
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Halaman dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Rute Untuk Barcode Scanner
 Route::get('/barcode-data', function () {

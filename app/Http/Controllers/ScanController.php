@@ -12,30 +12,23 @@ class ScanController extends Controller
 {
     public function processScan(Request $request)
     {
-        // Validasi input file
         $request->validate([
-            'qr_image' => 'required|image|mimes:png,jpg,jpeg|max:2048', // Gambar harus berupa PNG, JPG, atau JPEG
+            'qr_image' => 'required|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        // Simpan gambar hasil upload sementara
         $uploadedFile = $request->file('qr_image');
         $filePath = $uploadedFile->store('temp', 'public');
-
-        // Full path ke file yang disimpan
         $fullPath = storage_path('app/public/' . $filePath);
 
         try {
-            // Decode QR code menggunakan library
-            $qrcode = new QrReader($fullPath); // Membaca QR code dari file
-            $decodedText = $qrcode->text(); // Mendapatkan teks dari QR code
-
-            // Log hasil decode untuk debugging
-            Log::info('Decoded Text from QR Code: ' . $decodedText);
+            $qrcode = new QrReader($fullPath);
+            $decodedText = $qrcode->text();
 
             // Hapus file sementara
             Storage::disk('public')->delete($filePath);
 
-            // Validasi apakah teks hasil decode kosong
+            Log::info('Decoded Text from QR Code: ' . $decodedText);
+
             if (!$decodedText || trim($decodedText) === '') {
                 return response()->json([
                     'success' => false,
@@ -43,7 +36,6 @@ class ScanController extends Controller
                 ]);
             }
 
-            // Cek apakah hasil decode berupa JSON
             $decodedJson = json_decode($decodedText, true);
             if ($decodedJson && isset($decodedJson['id_barang'])) {
                 $id_barang = $decodedJson['id_barang'];
@@ -58,10 +50,15 @@ class ScanController extends Controller
             $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
 
             if ($barang) {
+                // Simpan data barang ke session
+                session(['barang' => $barang]);
+
+                Log::info('Barang berhasil disimpan ke session: ' . json_encode($barang));
+
                 return response()->json([
                     'success' => true,
                     'message' => 'QR Code valid. Barang ditemukan.',
-                    'data' => $barang,
+                    'redirect_url' => route('dashboard'), // Sertakan URL dashboard
                 ]);
             } else {
                 return response()->json([

@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-       html, body {
+        html, body {
             background: linear-gradient(to right, #6a11cb, #2575fc);
             color: #ffffff;
             font-family: Arial, sans-serif;
@@ -48,7 +48,7 @@
         }
         .content-wrapper {
             background: #ffffff;
-            color: #cf1515;
+            color: #000000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             padding: 30px;
@@ -131,5 +131,4 @@
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     @stack('scripts')
 </body>
-</html>
-    
+</html>  
