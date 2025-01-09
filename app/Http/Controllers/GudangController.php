@@ -55,12 +55,22 @@ class GudangController extends Controller
      */
     public function show(string $id)
     {
-        $stok_gudang = Gudang::where('id_barang', $id)->value('stok');
-        return view('gudang.show', ['stok_gudang' => $stok_gudang]);
-
-        $gudang = Gudang::findOrFail($id);
-        return view('gudang.show', compact('gudang'));
+        // Cari data barang berdasarkan id_barang
+        $gudang = Gudang::where('id_barang', $id)->first();
+    
+        if (!$gudang) {
+            return response()->json(['error' => 'Barang tidak ditemukan'], 404);
+        }
+    
+        // Kembalikan data stok sebagai JSON
+        return response()->json([
+            'stok' => $gudang->stok,
+            'nama_barang' => $gudang->nama_barang,
+            'jenis_barang' => $gudang->jenis_barang,
+            'lokasi_rak' => $gudang->lokasi_rak,
+        ]);
     }
+    
 
     /**
      * Show the form for editing the specified resource.

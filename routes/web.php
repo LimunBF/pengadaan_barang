@@ -1,5 +1,5 @@
 <?php
-
+use App\Models\Gudang;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GudangController;
@@ -16,6 +16,8 @@ Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard
 // Halaman Gudang
 Route::get('/gudang', [GudangController::class, 'index'])->name('gudang.index');
 Route::get('/gudang/{id}', [GudangController::class, 'show'])->name('gudang.show');
+Route::resource('gudang', GudangController::class);
+Route::get('/gudang/{id}/stok', [GudangController::class, 'show']);
 
 
 // Halaman Transaksi

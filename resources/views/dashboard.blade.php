@@ -47,11 +47,14 @@
             <label for="jenis_barang" class="form-label">Jenis Barang</label>
             <input type="text" id="jenis_barang" name="jenis_barang" class="form-control" readonly>
         </div>
-
+        
         <div class="mb-3">
-            <label for="kuantitas" class="form-label">Stok Saat Ini </label>
-            <input type="number" id="kuantitas" name="kuantitas" class="form-control" placeholder="Stok saat ini" min="1" required>
+            <label for="kuantitas" class="form-label">
+                Stok Saat Ini: <span id="stok-gudang" class="badge bg-info text-dark">0</span>
+            </label>
+            <input type="number" id="kuantitas" name="kuantitas" class="form-control" placeholder="Stok saat ini" min="0" required>
         </div>
+        
         
         
         <div class="mb-3">
@@ -187,9 +190,46 @@
             if (document.getElementById('deskripsi_barang')) {
                 document.getElementById('deskripsi_barang').value = data.deskripsi_barang || '';
             }
+            
         }
     )
     }
 )
+document.getElementById('id_barang').addEventListener('change', function () {
+    let idBarang = this.value;
+
+    // Kosongkan label jika ID Barang kosong
+    if (idBarang.trim() === '') {
+        clearBarangForm();
+        return;
+    }
+
+    // AJAX request untuk mendapatkan data barang
+    fetch(`/gudang/${idBarang}/stok`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Barang tidak ditemukan');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Perbarui stok barang di label dan input field
+            document.getElementById('stok-gudang').innerText = data.stok || 0;
+            document.getElementById('kuantitas').value = data.stok || 0;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            clearBarangForm(); // Kosongkan jika terjadi error
+        });
+});
+
+// Fungsi untuk mengosongkan label dan form
+function clearBarangForm() {
+    document.getElementById('stok-gudang').innerText = '0';
+    document.getElementById('kuantitas').value = '';
+}
+
+
+
 </script>
 @endsection
