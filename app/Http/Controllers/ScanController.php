@@ -4,17 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log; // Import namespace Log
 use App\Models\Barang;
-use Zxing\QrReader; // Import namespace dari library
+use Zxing\QrReader; // Import namespace untuk QR code reader
 
 class ScanController extends Controller
 {
-    /**
-     * Proses hasil scan QR code.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function processScan(Request $request)
     {
         // Validasi input file
@@ -34,6 +29,9 @@ class ScanController extends Controller
             $qrcode = new QrReader($fullPath); // Membaca QR code dari file
             $decodedText = $qrcode->text(); // Mendapatkan teks dari QR code
 
+            // Log hasil decode untuk debugging
+            Log::info('Decoded Text from QR Code: ' . $decodedText);
+
             // Hapus file sementara
             Storage::disk('public')->delete($filePath);
 
@@ -45,8 +43,19 @@ class ScanController extends Controller
                 ]);
             }
 
-            // Cari barang berdasarkan id_barang (hasil decode)
-            $barang = Barang::where('id_barang', $decodedText)->where('kondisi', 'ada')->first();
+            // Cek apakah hasil decode berupa JSON
+            $decodedJson = json_decode($decodedText, true);
+            if ($decodedJson && isset($decodedJson['id_barang'])) {
+                $id_barang = $decodedJson['id_barang'];
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format QR Code tidak valid. Tidak ditemukan id_barang.',
+                ]);
+            }
+
+            // Cari barang berdasarkan id_barang
+            $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
 
             if ($barang) {
                 return response()->json([
