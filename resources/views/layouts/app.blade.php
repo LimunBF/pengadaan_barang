@@ -15,8 +15,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            min-height: 100vh; /* Memastikan body memiliki tinggi minimal layar penuh */
-            height: 100%; /* Pastikan body dan html memiliki tinggi 100% */
+            min-height: 100vh; /* Memastikan body memiliki tinggi minimal layar penuh */ /* Pastikan body dan html memiliki tinggi 100% */
             display: flex; /* Gunakan Flexbox */
             flex-direction: column; 
         }

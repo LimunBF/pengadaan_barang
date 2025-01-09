@@ -15,7 +15,7 @@ Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard
 
 // Halaman Gudang
 Route::get('/gudang', [GudangController::class, 'index'])->name('gudang.index');
-Route::get('/form', [GudangController::class, 'showF'])->name('form.show');
+Route::get('/gudang/{id}', [GudangController::class, 'show'])->name('gudang.show');
 
 
 // Halaman Transaksi

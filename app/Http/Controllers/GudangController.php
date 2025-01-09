@@ -55,13 +55,10 @@ class GudangController extends Controller
      */
     public function show(string $id)
     {
-        $stok_gudang = Gudang::table('gudang')->value('stok');
-    
-        // Kirim stok ke tampilan
-        return view('form-view', compact('stok_gudang'));
+        $stok_gudang = Gudang::where('id_barang', $id)->value('stok');
+        return view('gudang.show', ['stok_gudang' => $stok_gudang]);
 
         $gudang = Gudang::findOrFail($id);
-
         return view('gudang.show', compact('gudang'));
     }
 

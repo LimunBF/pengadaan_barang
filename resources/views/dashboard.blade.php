@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Dashboard')
+@section('title', 'Dashboard', 'Data Gudang')
 @section('content')
 <div class="container">
     <form method="POST" action="{{ route('logout') }}">
@@ -16,6 +16,8 @@
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
+   
+    
 
     {{-- Formulir --}}
     <form method="POST" action="{{ route('transaksi.store') }}">
@@ -47,9 +49,10 @@
         </div>
 
         <div class="mb-3">
-            <label for="kuantitas" class="form-label">Stok Saat Ini  </label>
-            <input type="number" id="kuantitas" name="kuantitas" class="form-control" value="{{ $stok_gudang ?? '' }}" min="1" required>
+            <label for="kuantitas" class="form-label">Stok Saat Ini </label>
+            <input type="number" id="kuantitas" name="kuantitas" class="form-control" placeholder="Stok saat ini" min="1" required>
         </div>
+        
         
         <div class="mb-3">
             <label for="lokasi_rak" class="form-label">Lokasi Rak</label>
@@ -94,7 +97,6 @@
         </div>
     </div>
 </div>
-
 {{-- Script untuk QR Code Scanner --}}
 <script>
     let videoElement = document.getElementById('qr-video');
