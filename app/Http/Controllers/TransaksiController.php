@@ -17,13 +17,21 @@ class TransaksiController extends Controller
         // Kirim data transaksi ke view
         return view('transaksi.index', compact('transaksi'));
     }
+    public function masuk()
+{
+    // Ambil hanya transaksi tipe "masuk"
+    $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();
+
+    // Kirim data transaksi ke view
+    return view('transaksi.masuk', compact('transaksi'));
+}
     public function keluar()
     {
         // Ambil semua data transaksi dari database
-        $transaksi = Transaksi::all();
+        $transaksi = Transaksi::where('tipe_transaksi', 'keluar')->get();
 
         // Kirim data transaksi ke view
-        return view('transaksi.index', compact('transaksi'));
+        return view('transaksi.keluar', compact('transaksi'));
     }
     public function store(Request $request)
     {

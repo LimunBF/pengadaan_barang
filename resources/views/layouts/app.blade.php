@@ -106,7 +106,7 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{{ route('transaksi.index') }}">Masuk</a>
-                            <a class="dropdown-item" href="{{ route('transaksi.index') }}">Keluar</a>
+                            <a class="dropdown-item" href="{{ route('transaksi.keluar') }}">Keluar</a>
                         </div>
                     </li>
                 </ul>

@@ -26,6 +26,8 @@ Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('tr
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+Route::get('/transaksi/masuk', [TransaksiController::class, 'masuk'])->name('transaksi.masuk');
+Route::get('/transaksi/keluar', [TransaksiController::class, 'keluar'])->name('transaksi.keluar');
 
 
 Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');

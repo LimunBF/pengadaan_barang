@@ -17,7 +17,7 @@
                 <th>ID Barang</th>
                 <th>Jenis Transaksi</th>
                 <th>Kuantitas</th>
-                <th>Nama Pengirim/Penerima</th>
+                <th>Nama Petugas</th>
                 <th>Waktu</th>
                 <th>Catatan</th>
             </tr>
