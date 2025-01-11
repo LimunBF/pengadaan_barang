@@ -6,7 +6,7 @@
 <h1 class="mb-4">Data Gudang</h1>
 
 <table class="table table-bordered table-striped">
-    <thead class="table-dark">
+    <thead class="table">
         <tr>
             <th style="text-align: center;">ID Barang</th>
             <th style="text-align: center;">Nama Barang</th>

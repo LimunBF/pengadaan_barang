@@ -56,13 +56,15 @@ Route::post('/barang/{id}/cancel-edit', [DaftarBarangController::class, 'cancelE
 
 
 //LOGIN LOGOUT RUTE
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login'); // Route GET untuk halaman login
+Route::post('/login', [AuthController::class, 'login'])->name('login.post'); // Route POST untuk memproses login
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 // Rute Untuk Barcode Scanner
 Route::get('/barcode-data', function () {
     return view('barcode.barcode-data');
-});
+})->name('barcode.data');
+
+
 Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');

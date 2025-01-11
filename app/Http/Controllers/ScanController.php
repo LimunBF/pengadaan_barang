@@ -10,6 +10,18 @@ use Zxing\QrReader; // Import namespace untuk QR code reader
 
 class ScanController extends Controller
 {
+    
+    public function index(Request $request)
+    {
+        // Periksa apakah pengguna sudah login
+        if (!session('is_logged_in')) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+
+        // Tampilkan halaman dashboard
+        return view('/');
+    }
+
     public function processScan(Request $request)
     {
         $request->validate([

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -12,8 +13,8 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         // Jika sudah login, redirect ke dashboard
-        if (session('is_logged_in')) {
-            return redirect()->route('dashboard');
+        if (session('is_logged_in', false)) {
+            return redirect()->route('barcode.data');
         }
 
         return view('auth.login');
@@ -26,17 +27,21 @@ class AuthController extends Controller
             'email' => 'required',
             'password' => 'required',
         ]);
+        Log::info(__('validation.required'));
 
         // Periksa email dan password statik
         if ($request->email === $this->validEmail && $request->password === $this->validPassword) {
             // Simpan informasi login di session
             session(['is_logged_in' => true]);
-
-            return redirect()->route('dashboard')->with('success', 'Login berhasil!');
+            Log::info('Session is_logged_in set: ' . session('is_logged_in'));
+    
+            // Redirect ke halaman barcode-data
+            return redirect()->route('barcode.data')->with('success', 'Login berhasil!');
         }
-
+    
         // Jika gagal login
-        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
+        Log::info('Login failed.');
+        return back()->withErrors(['email' => 'Username atau password salah.'])->withInput();
     }
 
     public function logout()

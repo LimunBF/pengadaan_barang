@@ -9,80 +9,164 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Global Styles */
         html, body {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #ffffff;
-            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            min-height: 100vh; /* Memastikan body memiliki tinggi minimal layar penuh */ /* Pastikan body dan html memiliki tinggi 100% */
-            display: flex; /* Gunakan Flexbox */
-            flex-direction: column; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .content-wrapper {
-            background: #ffffff;
-            color: #000000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 30px;
-            margin-bottom: 30px;
-            min-height: calc(110vh - 230px);
-        }
+
+        /* Navbar Styles */
         .navbar {
-            background: rgba(0, 0, 0, 0.8);
+            background: #06615E;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .navbar-brand {
             font-weight: bold;
-            font-size: 1.7rem;
-            color: #ffffff;
+            font-size: 1.8rem;
+            color: #FFFFFF;
         }
+
         .navbar-brand:hover {
-            color: #2673FB;
+            color: #F9A33E;
         }
+
         .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.8);
+            color: #FFFFFF; /* Teks menjadi putih penuh */
+            font-weight: 500; /* Menambahkan sedikit ketebalan */
+            font-size: 1.1rem; /* Sedikit memperbesar font */
+            letter-spacing: 0.5px; /* Memberikan sedikit spasi antar huruf */
+            transition: color 0.3s ease;
         }
+
         .navbar-nav .nav-link:hover {
-            color: #ffffff;
+            color: #F9A33E; /* Memberikan aksen oranye pada hover */
         }
+
+        .navbar-toggler-icon {
+            background-color: #ffffff;
+        }
+
+        .navbar-nav .dropdown-menu {
+            background-color: #FFFFFF;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-nav .dropdown-item {
+            font-size: 1rem;
+        }
+
+        .navbar-nav .dropdown-item:hover {
+            background-color: #06615E;
+            color: #FFFFFF;
+        }
+
+        /* Content Wrapper */
         .content-wrapper {
             background: #ffffff;
-            color: #000000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 30px;
-            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 20px;
             flex: 1;
         }
+
+        /* Footer Styles */
         footer {
-    background: rgba(0, 0, 0, 0.8);
-    color: #ffffff;
-    text-align: center;
-    padding: 15px 0;
-    width: 100%;
-}
+            background: #06615E;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
         footer p {
             margin: 0;
+            font-size: 0.9rem;
         }
-        .table-secondary {
-            background-color: #f0f0f0 !important;
-            color: #6c757d;
+
+        /* Tabel Styles */
+        .table {
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
         }
-        .table-secondary .btn {
-            pointer-events: none;
-            opacity: 0.5;
+
+        .table thead {
+            background-color: #06615E;
+            color: #FFFFFF;
         }
+
+        .table thead th {
+            font-weight: bold;
+        }
+
+        .table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #ecf0f1;
+        }
+
+        .table tbody tr:hover {
+            background-color: #dcdfe1;
+        }
+
+        .table th, .table td {
+            border: 1px solid #ddd;
+        }
+
+        /* Button Styling */
         .btn-large {
-            font-size: 1.5rem;
-            padding: 20px 40px;
+            font-size: 1.2rem;
+            padding: 12px 30px;
             width: 100%;
             margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #F9A33E;
+            color: white;
+            border: none;
+        }
+
+        .btn-large:hover {
+            background-color: #e38e29;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 992px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .content-wrapper {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-nav .nav-link {
+                font-size: 1rem;
+            }
+
+            .content-wrapper {
+                margin-top: 20px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="{{ route('dashboard') }}">Pengelolaan Gudang</a>
@@ -101,7 +185,7 @@
                         <a class="nav-link" href="{{ route('gudang.index') }}">Gudang</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Transaksi
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -114,21 +198,18 @@
         </div>
     </nav>
 
+    <!-- Main Content Area -->
     <div class="container content-wrapper">
         @yield('content')
     </div>
 
+    <!-- Footer -->
     <footer>
-        <div class="container">
-            <p>&copy; 2025 Diskominfo Madiun. All Rights Reserved.</p>
-        </div>
+        <p>&copy; 2025 Diskominfo Madiun. All Rights Reserved.</p>
     </footer>
 
+    <!-- Script Files -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     @stack('scripts')
 </body>
-</html>  
+</html>
