@@ -52,8 +52,8 @@
                 <label for="kuantitas" class="form-label">
                     Stok Saat Ini: <span id="stok-gudang" class="badge bg-info text-dark">{{ $barang->stok ?? 0 }}</span>
                 </label>
-                <input type="number" id="kuantitas" name="kuantitas" class="form-control" value="{{ $barang->stok ?? '' }}"
-                    placeholder="Stok saat ini" min="0" required>
+                <input type="number" id="kuantitas" name="kuantitas" class="form-control"
+                    placeholder="Masukkan jumlah stok baru" min="0" required>
             </div>
 
             <div class="mb-3">
@@ -149,6 +149,36 @@
                         console.error('Error:', error);
                         clearBarangForm();
                     });
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Ambil nilai id_barang dari input
+                let idBarang = document.getElementById('id_barang').value.trim();
+
+                // Jika id_barang tidak kosong, lakukan fetch
+                if (idBarang) {
+                    fetch(`/gudang/${idBarang}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Data barang tidak ditemukan');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Perbarui elemen HTML dengan data barang yang diperoleh
+                            document.getElementById('nama_barang').value = data.nama_barang || '';
+                            document.getElementById('jenis_barang').value = data.jenis_barang || '';
+                            document.getElementById('stok-gudang').innerText = data.stok || '0'; // Update stok
+                            document.getElementById('kuantitas').value = data.stok || '';       // Update kuantitas
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(error.message);
+                            clearBarangForm();
+                        });
+                } else {
+                    console.warn('ID Barang kosong. Tidak ada data yang akan dimuat.');
+                }
             });
 
             // Fungsi untuk mengosongkan form barang

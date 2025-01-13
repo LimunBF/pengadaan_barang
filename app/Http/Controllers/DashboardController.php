@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Gudang;
+use App\Models\Barang;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -29,5 +31,29 @@ class DashboardController extends Controller
     public function createBarang()
     {
         return view('barang.create');
+    }
+
+    public function show($id)
+    {
+        // Mengambil data barang dari tabel gudang berdasarkan id_barang
+        $barang = Gudang::where('id_barang', $id)->first();
+    
+        // Jika data barang tidak ditemukan
+        if (!$barang) {
+            return response()->json([
+                'message' => 'Data barang tidak ditemukan',
+            ], 404);
+        }
+    
+        // Kembalikan data barang dalam format JSON
+        return response()->json([
+            'id_barang' => $barang->id_barang,
+            'nama_barang' => $barang->nama_barang,
+            'jenis_barang' => $barang->jenis_barang,
+            'lokasi_rak' => $barang->lokasi_rak,
+            'deskripsi_barang' => $barang->deskripsi_barang,
+            'stok' => $barang->stok,
+            'satuan' => $barang->satuan,
+        ]);
     }
 }
