@@ -18,7 +18,7 @@
         @endif
 
         {{-- Formulir --}}
-        <form method="POST" action="{{ route('transaksi.store') }}">
+        <form method="POST" action="{{ route('transaksi.store') }}" autocomplete="off">
             @csrf
             <div class="mb-3">
                 <label for="proses" class="form-label">Proses</label>
@@ -155,31 +155,36 @@
                 // Ambil nilai id_barang dari input
                 let idBarang = document.getElementById('id_barang').value.trim();
 
-                // Jika id_barang tidak kosong, lakukan fetch
-                if (idBarang) {
-                    fetch(`/gudang/${idBarang}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Data barang tidak ditemukan');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            // Perbarui elemen HTML dengan data barang yang diperoleh
-                            document.getElementById('nama_barang').value = data.nama_barang || '';
-                            document.getElementById('jenis_barang').value = data.jenis_barang || '';
-                            document.getElementById('stok-gudang').innerText = data.stok || '0'; // Update stok
-                            document.getElementById('kuantitas').value = data.stok || '';       // Update kuantitas
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert(error.message);
-                            clearBarangForm();
-                        });
+                // Jika id_barang tidak kosong, gunakan data dari session
+                if (idBarang && typeof window.barangFromSession !== 'undefined') {
+                    console.log('Menggunakan data barang dari session:', window.barangFromSession);
+
+                    // Perbarui elemen HTML dengan data dari session
+                    document.getElementById('nama_barang').value = window.barangFromSession.nama_barang || '';
+                    document.getElementById('jenis_barang').value = window.barangFromSession.jenis_barang || '';
+                    document.getElementById('stok-gudang').innerText = window.barangFromSession.stok || '0';
+                    document.getElementById('kuantitas').value = '';
+                    const fotoBarang = window.barangFromSession.foto_barang || 'https://via.placeholder.com/150?text=No+Image';
+                    document.getElementById('foto-barang').src = fotoBarang;
+                    document.getElementById('modal-foto-barang').src = fotoBarang;
                 } else {
-                    console.warn('ID Barang kosong. Tidak ada data yang akan dimuat.');
+                    console.warn('Tidak ada data barang di session. Fetching dari server...');
+                    // Lakukan fetch jika session kosong
                 }
+
+                const form = document.querySelector('form');
+                form.addEventListener('submit', function (event) {
+                    // Cegah submit jika ingin simulasi di client-side saja
+                    // event.preventDefault();
+                    
+                    // Kosongkan form
+                    clearBarangForm();
+
+                    // Tampilkan pesan berhasil di log atau alert
+                    console.log('Form berhasil dikirim dan data session telah dihapus.');
+                });
             });
+
 
             // Fungsi untuk mengosongkan form barang
             function clearBarangForm() {

@@ -170,13 +170,6 @@ class BarangController extends Controller
     }
 }
 
-
-
-    
-    
-
-    
-
      // public function generateQRCode(Barang $barang)
     // {
     //     // Siapkan data untuk QR Code (format JSON)

@@ -14,6 +14,10 @@ class DashboardController extends Controller
         $barang = session('barang', null);
     
         if ($barang) {
+            // Ambil stok dari tabel Gudang berdasarkan id_barang
+            $stokGudang = Gudang::where('id_barang', $barang->id_barang)->value('stok');
+            $barang->stok = $stokGudang; // Tambahkan stok ke objek barang
+            
             Log::info('Barang diambil dari session: ' . json_encode($barang));
         } else {
             Log::info('Session "barang" kosong atau tidak ada.');
