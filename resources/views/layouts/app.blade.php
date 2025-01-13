@@ -77,6 +77,31 @@
             margin-top: 20px;
             flex: 1;
         }
+        
+        /* Button Styling */
+        .btn {
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #F9A33E;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #e38e29;
+            transform: scale(1.05);
+        }
+
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 0 5px 2px rgba(243, 162, 62, 0.5);
+        }
+
+        .btn-success:hover {
+            background-color: #045e54;
+        }
 
         /* Footer Styles */
         footer {
@@ -117,7 +142,7 @@
         }
 
         .table tbody tr:hover {
-            background-color: #dcdfe1;
+            background-color: #eeeff0;
         }
 
         .table th, .table td {
@@ -210,6 +235,7 @@
 
     <!-- Script Files -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
 </body>
 </html>
