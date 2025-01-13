@@ -143,10 +143,6 @@ class BarangController extends Controller
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
     }
-}
-
-
-    
     public function update(Request $request, $id_barang)
     {
         // Validasi input
@@ -172,6 +168,12 @@ class BarangController extends Controller
 
         return redirect()->route('barang.index')->with('success', 'Data barang berhasil diperbarui.');
     }
+}
+
+
+
+    
+    
 
     
 
