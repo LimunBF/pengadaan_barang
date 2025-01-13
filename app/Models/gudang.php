@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Gudang extends Model
 {
     use HasFactory;
-
     protected $table = 'gudang'; // Nama tabel
     protected $primaryKey = 'id_barang'; // Primary key
     public $incrementing = false; // Jika primary key bukan auto-increment
@@ -26,4 +25,9 @@ class Gudang extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang', 'id_barang');
+    }
 }

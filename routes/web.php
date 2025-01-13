@@ -39,6 +39,7 @@ Route::get('/barang/{id_barang}/download-qr', [BarangController::class, 'downloa
 Route::get('/barang/{id}', [BarangController::class, 'getBarang'])->name('barang.get');
 Route::get('/barang/{id_barang}', [BarangController::class, 'show'])->name('barang.show');
 Route::post('/scan-barcode', [BarangController::class, 'scan']);
+Route::put('/barang/{id_barang}', [BarangController::class, 'update'])->name('barang.update');
 
 // R U T E   U N T U K   H A L A M A N  D A F T A R  B A R A N G
 // Rute untuk halaman daftar barang

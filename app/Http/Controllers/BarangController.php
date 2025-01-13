@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\Gudang;
 use Illuminate\Http\Request;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -142,6 +143,35 @@ class BarangController extends Controller
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
     }
+
+    
+    public function update(Request $request, $id_barang)
+    {
+        // Validasi input
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'jenis_barang' => 'required|string|max:255',
+        ]);
+
+        // Cari data barang
+        $barang = Barang::findOrFail($id_barang);
+
+        // Update data barang
+        $barang->update([
+            'nama_barang' => $request->nama_barang,
+            'jenis_barang' => $request->jenis_barang,
+        ]);
+
+        // Perbarui juga data di tabel gudang jika barang terkait ada di sana
+        Gudang::where('id_barang', $id_barang)->update([
+            'nama_barang' => $request->nama_barang,
+            'jenis_barang' => $request->jenis_barang,
+        ]);
+
+        return redirect()->route('barang.index')->with('success', 'Data barang berhasil diperbarui.');
+    }
+
+    
 
      // public function generateQRCode(Barang $barang)
     // {

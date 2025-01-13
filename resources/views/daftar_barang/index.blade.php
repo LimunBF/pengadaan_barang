@@ -88,7 +88,8 @@
                             @else
                                 Tidak ada QR Code
                             @endif
-                        </td>                        
+                        </td>                 
+                               
                         <td class="text-center">
                             <div class="btn-group-vertical w-100">
                                 @if (session('edit_id') == $item->id_barang)
@@ -101,10 +102,11 @@
                                 @elseif($item->kondisi == 'dihapus')
                                     <button class="btn btn-light btn-sm w-100" disabled>Barang Dihapus</button>
                                 @else
-                                    <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-warning btn-sm w-100">Edit</button>
-                                    </form>
+                                <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning btn-sm w-100">Edit</button>
+                                </form>
+                                                              
                                     <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')

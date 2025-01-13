@@ -49,4 +49,23 @@ class Barang extends Model
     {
         return $this->kondisi === 'ada' ? 'Tersedia' : 'Telah Dihapus';
     }
+
+   
+    // Relasi ke Gudang
+    public function gudang()
+    {
+        return $this->hasMany(Gudang::class, 'id_barang', 'id_barang');
+    }
+
+    protected static function booted()
+{
+    static::updated(function ($barang) {
+        // Update nama_barang di tabel gudang berdasarkan id_barang
+        Gudang::where('id_barang', $barang->id_barang)->update([
+            'nama_barang' => $barang->nama_barang,
+            'jenis_barang' => $barang->jenis_barang,
+        ]);
+    });
+}
+
 }
