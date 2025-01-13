@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Barang;
 use Illuminate\Support\Facades\Log;
+use App\Services\QRCodeService;
 
 class DaftarBarangController extends Controller
 {
@@ -28,22 +29,24 @@ class DaftarBarangController extends Controller
         session(['edit_id' => $id]);
         return redirect()->back();
     }
-    
-    
+
+    private $qrCodeService;
+
+    public function __construct(QRCodeService $qrCodeService)
+    {
+        $this->qrCodeService = $qrCodeService;
+    }
 
     public function update(Request $request, $id_barang)
     {
-        // Validasi input
         $request->validate([
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'nullable|string|max:255',
-            'foto_barang' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi untuk gambar
+            'foto_barang' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Ambil data barang
         $barang = Barang::findOrFail($id_barang);
 
-        // Update data barang
         $dataUpdate = [
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
@@ -54,41 +57,39 @@ class DaftarBarangController extends Controller
             ]),
         ];
 
-        // Jika ada file gambar baru, proses gambar
         if ($request->hasFile('foto_barang')) {
-            Log::info('File gambar diterima: ' . $request->file('foto_barang')->getClientOriginalName());
-
-            // Hapus gambar lama jika ada
             if ($barang->foto_barang) {
-                $relativePath = str_replace(asset('storage'), '', $barang->foto_barang); // Hapus bagian URL
+                $relativePath = str_replace(asset('storage'), '', $barang->foto_barang);
                 $oldImagePath = storage_path('app/public' . $relativePath);
 
-                Log::info('Path gambar lama: ' . $oldImagePath);
                 if (file_exists($oldImagePath)) {
-                    Log::info('Gambar lama ditemukan dan akan dihapus.');
-                    unlink($oldImagePath); // Hapus file gambar lama
-                } else {
-                    Log::error('Gambar lama tidak ditemukan di path: ' . $oldImagePath);
+                    unlink($oldImagePath);
                 }
             }
 
-            // Simpan file gambar baru
             $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
             $fotoUrl = asset('storage/' . $fotoPath);
-
-            // Tambahkan URL gambar baru ke data yang akan diupdate
             $dataUpdate['foto_barang'] = $fotoUrl;
         }
 
-        // Perbarui database dengan data baru
         $barang->update($dataUpdate);
 
-        // Reset session edit_id setelah update
+        // Hapus file QR Code lama
+        $this->qrCodeService->deleteQRCode($barang->id_barang);
+
+        // Generate QR Code baru
+        $qrCodePath = $this->qrCodeService->generateQRCode(
+            json_encode(['id_barang' => $barang->id_barang]),
+            $barang->id_barang,
+            $barang->nama_barang
+        );
+
+        $barang->update(['qr_code_path' => $qrCodePath]);
+
         session()->forget('edit_id');
 
-        return redirect()
-            ->route('barang.index')
-            ->with('success', 'Barang berhasil diperbarui.');
+        return redirect()->route('barang.index')
+            ->with('success', 'Barang dan QR Code berhasil diperbarui.');
     }
 
     public function destroy($id_barang)

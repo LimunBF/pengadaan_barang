@@ -11,6 +11,7 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
+use App\Services\QRCodeService;
 
 class BarangController extends Controller
 {
@@ -25,107 +26,12 @@ class BarangController extends Controller
         return view('barang.create', compact('nextId'));
     }    
 
-    public function generateQRCode(Barang $barang)
+    private $qrCodeService;
+
+    public function __construct(QRCodeService $qrCodeService)
     {
-        // Siapkan data untuk QR Code (format JSON)
-        $qrData = json_encode([
-            'id_barang' => $barang->id_barang,
-        ]);
-
-        // Path untuk menyimpan QR Code
-        $qrFolder = 'barang_qr_codes'; // Sub-folder di storage
-        $qrFileName = "{$barang->id_barang}_raw.png"; // Nama file QR Code
-        $qrStoragePath = storage_path("app/public/{$qrFolder}"); // Path lengkap di storage
-
-        // Buat direktori jika belum ada
-        if (!is_dir($qrStoragePath)) {
-            mkdir($qrStoragePath, 0755, true);
-        }
-
-        // Generate QR Code
-        $qrCode = new QrCode(
-            data: $qrData,
-            encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 300,
-            margin: 10,
-            roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            foregroundColor: new Color(0, 0, 0), // Warna hitam
-            backgroundColor: new Color(255, 255, 255) // Warna putih
-        );
-
-        // Tentukan lokasi file QR Code
-        $qrImagePath = "{$qrStoragePath}/{$qrFileName}";
-
-        // Simpan QR Code sebagai gambar (tanpa teks)
-        $writer = new PngWriter();
-        $writer->write($qrCode)->saveToFile($qrImagePath);
-
-        // **Tambahkan Teks ke Gambar**
-        $finalFileName = "{$barang->id_barang}.png"; // Nama file final
-        $finalImagePath = "{$qrStoragePath}/{$finalFileName}";
-        $this->addTextToImage($qrImagePath, $finalImagePath, $barang->nama_barang);
-
-        // Hapus gambar QR code asli tanpa teks jika tidak diperlukan
-        unlink($qrImagePath);
-
-        // Kembalikan URL path gambar QR Code
-        return asset("storage/{$qrFolder}/{$finalFileName}");
+        $this->qrCodeService = $qrCodeService;
     }
-
-
-    /**
-     * Tambahkan teks ke gambar
-     *
-     * @param string $sourcePath Path gambar QR code asli
-     * @param string $destinationPath Path gambar final dengan teks
-     * @param string $text Teks yang akan ditambahkan
-     */
-    private function addTextToImage($sourcePath, $destinationPath, $text)
-    {
-        // Load gambar QR code
-        $image = imagecreatefrompng($sourcePath);
-    
-        // Tentukan ukuran gambar QR code
-        $width = imagesx($image);
-        $height = imagesy($image);
-    
-        // Tambahkan tinggi untuk teks
-        $newHeight = $height + 70; // Tambahkan 70px untuk teks
-        $newImage = imagecreatetruecolor($width, $newHeight);
-    
-        // Warna putih untuk latar belakang
-        $white = imagecolorallocate($newImage, 255, 255, 255);
-        imagefill($newImage, 0, 0, $white);
-    
-        // Salin gambar QR code ke gambar baru
-        imagecopy($newImage, $image, 0, 0, 0, 0, $width, $height);
-    
-        // Warna hitam untuk teks
-        $black = imagecolorallocate($newImage, 0, 0, 0);
-    
-        // Lokasi font TTF
-        $fontPath = storage_path('fonts/Rubik-Bold.ttf');
-    
-        // Ukuran font
-        $fontSize = 30; // Ukuran font dalam poin
-    
-        // Hitung posisi teks
-        $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
-        $textWidth = abs($bbox[2] - $bbox[0]);
-        $xPosition = ($width - $textWidth) / 2; // Teks di tengah
-        $yPosition = $height + 40; // Teks 40px di bawah gambar
-    
-        // Tambahkan teks ke gambar
-        imagettftext($newImage, $fontSize, 0, $xPosition, $yPosition, $black, $fontPath, $text);
-    
-        // Simpan gambar baru
-        imagepng($newImage, $destinationPath);
-    
-        // Hapus sumber daya gambar dari memori
-        imagedestroy($image);
-        imagedestroy($newImage);
-    }    
 
     public function store(Request $request)
     {
@@ -136,13 +42,11 @@ class BarangController extends Controller
             'foto_barang' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $jenis_barang = !empty($request->jenis_barang) ? $request->jenis_barang : 'tidak-ada';  // Jika tidak diisi, akan default ke '-'
+        $jenis_barang = $request->jenis_barang ?: '(kosong)';
 
-        // Simpan foto barang ke folder 'barang_photos'
-        if ($request->hasFile('foto_barang')) {
-            $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
-            $fotoUrl = asset('storage/' . $fotoPath);
-        }
+        // Simpan foto barang
+        $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
+        $fotoUrl = asset('storage/' . $fotoPath);
 
         // Simpan data barang
         $barang = Barang::create([
@@ -150,13 +54,17 @@ class BarangController extends Controller
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $jenis_barang,
             'foto_barang' => $fotoUrl,
-            'kondisi' => 'ada', // Tambahkan nilai default
+            'kondisi' => 'ada',
         ]);
 
-        // Generate QR Code dan simpan path-nya
-        $qrCodePath = $this->generateQRCode($barang);
+        // Generate QR Code
+        $qrCodePath = $this->qrCodeService->generateQRCode(
+            json_encode(['id_barang' => $barang->id_barang]),
+            $barang->id_barang,
+            $barang->nama_barang
+        );
 
-        // Update kode_qr dan qr_code_path di database
+        // Simpan path QR Code ke database
         $barang->update([
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
@@ -234,4 +142,106 @@ class BarangController extends Controller
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
     }
+
+     // public function generateQRCode(Barang $barang)
+    // {
+    //     // Siapkan data untuk QR Code (format JSON)
+    //     $qrData = json_encode([
+    //         'id_barang' => $barang->id_barang,
+    //     ]);
+
+    //     // Path untuk menyimpan QR Code
+    //     $qrFolder = 'barang_qr_codes'; // Sub-folder di storage
+    //     $qrFileName = "{$barang->id_barang}_raw.png"; // Nama file QR Code
+    //     $qrStoragePath = storage_path("app/public/{$qrFolder}"); // Path lengkap di storage
+
+    //     // Buat direktori jika belum ada
+    //     if (!is_dir($qrStoragePath)) {
+    //         mkdir($qrStoragePath, 0755, true);
+    //     }
+
+    //     // Generate QR Code
+    //     $qrCode = new QrCode(
+    //         data: $qrData,
+    //         encoding: new Encoding('UTF-8'),
+    //         errorCorrectionLevel: ErrorCorrectionLevel::High,
+    //         size: 300,
+    //         margin: 10,
+    //         roundBlockSizeMode: RoundBlockSizeMode::Margin,
+    //         foregroundColor: new Color(0, 0, 0), // Warna hitam
+    //         backgroundColor: new Color(255, 255, 255) // Warna putih
+    //     );
+
+    //     // Tentukan lokasi file QR Code
+    //     $qrImagePath = "{$qrStoragePath}/{$qrFileName}";
+
+    //     // Simpan QR Code sebagai gambar (tanpa teks)
+    //     $writer = new PngWriter();
+    //     $writer->write($qrCode)->saveToFile($qrImagePath);
+
+    //     // **Tambahkan Teks ke Gambar**
+    //     $finalFileName = "{$barang->id_barang}.png"; // Nama file final
+    //     $finalImagePath = "{$qrStoragePath}/{$finalFileName}";
+    //     $this->addTextToImage($qrImagePath, $finalImagePath, $barang->nama_barang);
+
+    //     // Hapus gambar QR code asli tanpa teks jika tidak diperlukan
+    //     unlink($qrImagePath);
+
+    //     // Kembalikan URL path gambar QR Code
+    //     return asset("storage/{$qrFolder}/{$finalFileName}");
+    // }
+
+
+    // /**
+    //  * Tambahkan teks ke gambar
+    //  *
+    //  * @param string $sourcePath Path gambar QR code asli
+    //  * @param string $destinationPath Path gambar final dengan teks
+    //  * @param string $text Teks yang akan ditambahkan
+    //  */
+    // private function addTextToImage($sourcePath, $destinationPath, $text)
+    // {
+    //     // Load gambar QR code
+    //     $image = imagecreatefrompng($sourcePath);
+    
+    //     // Tentukan ukuran gambar QR code
+    //     $width = imagesx($image);
+    //     $height = imagesy($image);
+    
+    //     // Tambahkan tinggi untuk teks
+    //     $newHeight = $height + 70; // Tambahkan 70px untuk teks
+    //     $newImage = imagecreatetruecolor($width, $newHeight);
+    
+    //     // Warna putih untuk latar belakang
+    //     $white = imagecolorallocate($newImage, 255, 255, 255);
+    //     imagefill($newImage, 0, 0, $white);
+    
+    //     // Salin gambar QR code ke gambar baru
+    //     imagecopy($newImage, $image, 0, 0, 0, 0, $width, $height);
+    
+    //     // Warna hitam untuk teks
+    //     $black = imagecolorallocate($newImage, 0, 0, 0);
+    
+    //     // Lokasi font TTF
+    //     $fontPath = storage_path('fonts/Rubik-Bold.ttf');
+    
+    //     // Ukuran font
+    //     $fontSize = 30; // Ukuran font dalam poin
+    
+    //     // Hitung posisi teks
+    //     $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+    //     $textWidth = abs($bbox[2] - $bbox[0]);
+    //     $xPosition = ($width - $textWidth) / 2; // Teks di tengah
+    //     $yPosition = $height + 40; // Teks 40px di bawah gambar
+    
+    //     // Tambahkan teks ke gambar
+    //     imagettftext($newImage, $fontSize, 0, $xPosition, $yPosition, $black, $fontPath, $text);
+    
+    //     // Simpan gambar baru
+    //     imagepng($newImage, $destinationPath);
+    
+    //     // Hapus sumber daya gambar dari memori
+    //     imagedestroy($image);
+    //     imagedestroy($newImage);
+    // }    
 }
