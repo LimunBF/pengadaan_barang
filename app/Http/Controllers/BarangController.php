@@ -102,7 +102,7 @@ class BarangController extends Controller
     public function downloadQRCode($id_barang)
     {
         $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-        $filePath = public_path("qr_codes/{$id_barang}.png");
+        $filePath = storage_path("app/public/barang_qr_codes/{$id_barang}.png");
 
         Log::info("Checking file path: {$filePath}");
 
@@ -143,6 +143,8 @@ class BarangController extends Controller
         // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
     }
+}
+
 
     
     public function update(Request $request, $id_barang)
@@ -274,4 +276,3 @@ class BarangController extends Controller
     //     imagedestroy($image);
     //     imagedestroy($newImage);
     // }    
-}
