@@ -8,6 +8,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DaftarBarangController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\PhotoController;
 
 // Halaman Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -69,3 +70,4 @@ Route::get('/barcode-data', function () {
 
 
 Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');
+Route::post('/save-photo', [PhotoController::class, 'store'])->name('photo.store');

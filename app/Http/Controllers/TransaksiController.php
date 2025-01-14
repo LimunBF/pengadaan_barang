@@ -11,31 +11,24 @@ class TransaksiController extends Controller
 {
     public function index()
     {
-        // Ambil semua data transaksi dari database
         $transaksi = Transaksi::all();
-
-        // Kirim data transaksi ke view
         return view('transaksi.index', compact('transaksi'));
     }
-    public function masuk()
-{
-    // Ambil hanya transaksi tipe "masuk"
-    $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();
 
-    // Kirim data transaksi ke view
-    return view('transaksi.masuk', compact('transaksi'));
-}
+    public function masuk()
+    {
+        $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();
+        return view('transaksi.masuk', compact('transaksi'));
+    }
+
     public function keluar()
     {
-        // Ambil semua data transaksi dari database
         $transaksi = Transaksi::where('tipe_transaksi', 'keluar')->get();
-
-        // Kirim data transaksi ke view
         return view('transaksi.keluar', compact('transaksi'));
     }
+
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'proses' => 'required|in:masuk,keluar',
             'id_barang' => 'required|string|max:50',
@@ -46,9 +39,9 @@ class TransaksiController extends Controller
             'kuantitas' => 'required|integer|min:1',
             'nama_pengirim_penerima' => 'required|string|max:255',
             'catatan' => 'nullable|string',
+            'image' => 'nullable|string', // Menambahkan validasi untuk foto
         ]);
 
-        // Ambil input dari form
         $id_barang = $request->input('id_barang');
         $nama_barang = $request->input('nama_barang');
         $jenis_barang = $request->input('jenis_barang');
@@ -57,24 +50,39 @@ class TransaksiController extends Controller
         $kuantitas = $request->input('kuantitas');
         $nama_pengirim_penerima = $request->input('nama_pengirim_penerima');
         $catatan = $request->input('catatan');
-        $proses = $request->input('proses'); // masuk atau keluar
+        $proses = $request->input('proses');
+        $imageData = $request->input('image'); // Foto dalam base64
 
-        // Cek apakah barang sudah ada di tabel gudang
+        // Simpan foto jika ada
+        $photoUrl = null;
+        if ($imageData) {
+            $fileName = 'photo_' . time() . '.png';
+            $image = str_replace('data:image/png;base64,', '', $imageData);
+            $image = str_replace(' ', '+', $image);
+            $image = base64_decode($image);
+
+            $localPath = public_path('photos/' . $fileName);
+
+            if (!file_exists(public_path('photos'))) {
+                mkdir(public_path('photos'), 0777, true);
+            }
+
+            file_put_contents($localPath, $image);
+            $photoUrl = asset('photos/' . $fileName); // URL foto
+        }
+
         $gudang = Gudang::where('id_barang', $id_barang)->first();
 
-        // Proses Barang Masuk
         if ($proses === 'masuk') {
             if ($gudang) {
-                // Jika barang sudah ada, tambahkan stok
                 $gudang->stok += $kuantitas;
                 $gudang->save();
             } else {
-                // Jika barang belum ada, tambahkan ke tabel gudang
                 Gudang::create([
                     'id_barang' => $id_barang,
                     'nama_barang' => $nama_barang,
                     'jenis_barang' => $jenis_barang,
-                    'lokasi_rak'=>$lokasi_rak,
+                    'lokasi_rak' => $lokasi_rak,
                     'deskripsi_barang' => $deskripsi_barang,
                     'stok' => $kuantitas,
                     'created_at' => now(),
@@ -83,10 +91,8 @@ class TransaksiController extends Controller
             }
         }
 
-        // Proses Barang Keluar
         if ($proses === 'keluar') {
             if ($gudang) {
-                // Pastikan stok cukup untuk dikurangi
                 if ($gudang->stok < $kuantitas) {
                     return redirect()->back()->with('error', 'Stok barang tidak mencukupi.');
                 }
@@ -97,7 +103,6 @@ class TransaksiController extends Controller
             }
         }
 
-        // Catat transaksi di tabel transaksi
         Transaksi::create([
             'id_barang' => $id_barang,
             'tipe_transaksi' => $proses,
@@ -105,6 +110,7 @@ class TransaksiController extends Controller
             'nama_pengirim_penerima' => $nama_pengirim_penerima,
             'waktu' => now(),
             'catatan' => $catatan,
+            'photo' => $photoUrl, // Menyimpan URL foto
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -112,5 +118,3 @@ class TransaksiController extends Controller
         return redirect()->back()->with('success', 'Transaksi berhasil dicatat.');
     }
 }
-
-

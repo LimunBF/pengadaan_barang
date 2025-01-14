@@ -14,24 +14,26 @@
         <thead>
             <tr>
                 <th>ID Transaksi</th>
-                <th>ID Barang</th>
+                <th>Waktu</th>
+                <th>Id Barang</th>
                 <th>Jenis Transaksi</th>
                 <th>Kuantitas</th>
-                <th>Nama Petugas</th>
-                <th>Waktu</th>
+                <th>Nama Pengirim / Penerima</th>
                 <th>Catatan</th>
+                <th>Photo</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($transaksi as $t)
                 <tr>
                     <td>{{ $t->id_transaksi }}</td>
+                    <td>{{ $t->waktu }}</td>
                     <td>{{ $t->id_barang }}</td>
-                    <td>{{ $t->tipe_transaksi }}</td>
+                    <td>{{ $t->tipe_transaksi}}</td>
                     <td>{{ $t->kuantitas }}</td>
                     <td>{{ $t->nama_pengirim_penerima }}</td>
-                    <td>{{ $t->waktu }}</td>
                     <td>{{ $t->catatan }}</td>
+                    <td>{{ $t->photo }}</td>
                 </tr>
             @endforeach
         </tbody>
