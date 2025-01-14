@@ -15,7 +15,7 @@ class CreateGudangTable extends Migration
             $table->string('lokasi_rak', 255);
             $table->text('deskripsi_barang')->nullable();
             $table->integer('stok')->default(0);
-            $table->integer('satuan')->nullable();
+            $table->string('satuan')->nullable();
             $table->foreign('id_barang')->references('id_barang')->on('barang')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

@@ -15,11 +15,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
 
 // Halaman Gudang
-Route::get('/gudang', [GudangController::class, 'index'])->name('gudang.index');
-Route::get('/gudang/{id}', [GudangController::class, 'show'])->name('gudang.show');
 Route::resource('gudang', GudangController::class);
 Route::get('/gudang/{id}/stok', [GudangController::class, 'show']);
-
+Route::get('/gudang/{id}/stok', [GudangController::class, 'show'])->name('gudang.stok');
+Route::put('/gudang/edit/{id}', [GudangController::class, 'updatePartial'])->name('gudang.updatePartial');
 
 // Halaman Transaksi
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');

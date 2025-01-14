@@ -89,7 +89,7 @@ class GudangController extends Controller
     {
         // Validasi data
         $request->validate([
-          'id_barang' => 'required|string|max:50|unique:gudang,id_barang',
+            'id_barang' => 'required|string|max:50|unique:gudang,id_barang',
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
             'lokasi_rak' => 'required|string|max:255',
@@ -104,6 +104,25 @@ class GudangController extends Controller
 
         return redirect()->route('gudang.index')->with('success', 'Barang berhasil diperbarui.');
     }
+
+    public function updatePartial(Request $request, $id)
+    {
+        // Validasi hanya untuk kolom yang diedit
+        $request->validate([
+            'lokasi_rak' => 'nullable|string|max:255',
+            'stok' => 'nullable|integer|min:0',
+            'satuan' => 'nullable|string|max:255',
+        ]);
+    
+        // Cari data barang berdasarkan ID
+        $gudang = Gudang::findOrFail($id);
+    
+        // Perbarui hanya kolom yang diedit
+        $gudang->update($request->only(['lokasi_rak', 'stok', 'satuan']));
+    
+        // Flash message untuk SweetAlert
+        return redirect()->route('gudang.index')->with('success', 'Data berhasil diperbarui.');
+    }    
 
     /**
      * Remove the specified resource from storage.
