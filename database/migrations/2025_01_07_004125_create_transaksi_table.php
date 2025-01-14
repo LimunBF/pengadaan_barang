@@ -17,9 +17,11 @@ class CreateTransaksiTable extends Migration
             $table->string('nama_pengirim_penerima', 255);
             $table->timestamp('waktu')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->text('catatan')->nullable();
+            $table->string('photo', 255);
             $table->foreign('id_barang')->references('id_barang')->on('barang')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
+        
     }
 
     public function down()

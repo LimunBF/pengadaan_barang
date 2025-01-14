@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,38 +8,43 @@ class PhotoController extends Controller
 {
     public function store(Request $request)
     {
-        $imageData = $request->input('image'); // Ambil data gambar dari request
-        $fileName = 'photo_' . time() . '.png'; // Nama file unik
+        // Validasi input
+        $request->validate([
+            'id_barang' => 'required|string|max:50',
+            'tipe_transaksi' => 'required|in:masuk,keluar',
+            'kuantitas' => 'required|integer|min:1',
+            'nama_pengirim_penerima' => 'required|string|max:255',
+            'catatan' => 'nullable|string',
+            'image_data' => 'required|string', // Base64 image
+        ]);
 
-        // Decode data URL
+        // Decode Base64 Image
+        $imageData = $request->input('image_data');
+        $fileName = 'photo_' . time() . '.png'; // Nama file unik
         $image = str_replace('data:image/png;base64,', '', $imageData);
         $image = str_replace(' ', '+', $image);
         $image = base64_decode($image);
 
-        // Path lokal di folder public/photos
-        $localPath = public_path('photos/' . $fileName);
+        // Simpan gambar ke folder lokal
+        $filePath = public_path('photos/' . $fileName);
 
-        // Pastikan folder photos ada
         if (!file_exists(public_path('photos'))) {
             mkdir(public_path('photos'), 0777, true);
         }
 
-        // Simpan file ke folder lokal
-        file_put_contents($localPath, $image);
+        file_put_contents($filePath, $image);
 
         // Simpan data ke tabel transaksi
+        $photoUrl = asset('photos/' . $fileName);
         Transaksi::create([
-            'id_barang' => $request->input('id_barang'), // Pastikan data ini dikirimkan dari frontend
-            'tipe_transaksi' => $request->input('tipe_transaksi'), // "masuk" atau "keluar"
+            'id_barang' => $request->input('id_barang'),
+            'tipe_transaksi' => $request->input('tipe_transaksi'),
             'kuantitas' => $request->input('kuantitas'),
             'nama_pengirim_penerima' => $request->input('nama_pengirim_penerima'),
             'catatan' => $request->input('catatan'),
-            'photo' => asset('photos/' . $fileName), // Link ke foto yang disimpan
+            'photo' => $photoUrl,
         ]);
 
-        return response()->json([
-            'message' => 'Transaksi berhasil disimpan!',
-            'file' => asset('photos/' . $fileName), // URL file untuk referensi
-        ]);
+        return redirect()->back()->with('success', 'Transaksi berhasil disimpan dengan foto.');
     }
 }

@@ -71,3 +71,4 @@ Route::get('/barcode-data', function () {
 
 Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');
 Route::post('/photo/store', [PhotoController::class, 'store'])->name('photo.store');
+Route::post('/transaksi/store', [PhotoController::class, 'store'])->name('transaksi.store');

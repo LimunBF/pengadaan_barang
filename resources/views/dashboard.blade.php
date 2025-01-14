@@ -236,6 +236,7 @@
                         captureButton.style.display = 'block';
                     })
                     .catch(error => {
+                        alert("Anda tidak memberikan izin untuk menggunakan kamera.");
                         console.error("Kamera tidak dapat diakses:", error);
                     });
             });
