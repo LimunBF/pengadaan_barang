@@ -89,6 +89,18 @@
                         data-bs-target="#fotoBarangModal">
                 </div>
             </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="foto_barang" class="form-label">Foto Bukti</label>
+                <div>
+                    <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                <button type="button" id="capture" class="btn btn-primary mt-3">Ambil Foto</button>
+                <input type="hidden" id="image_data" name="image_data">
+                <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3" style="display: none; max-width: 200px;">
+            </div>
+
             <button type="submit" class="btn btn-success">Submit</button>
         </form>
     </div>
@@ -206,6 +218,32 @@
                 document.getElementById('foto-barang').src = placeholder;
                 document.getElementById('modal-foto-barang').src = placeholder;
             }
+
+            const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture');
+    const imageDataInput = document.getElementById('image_data');
+    const preview = document.getElementById('preview');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(error => {
+            console.error("Kamera tidak dapat diakses:", error);
+        });
+
+    captureButton.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imgURL = canvas.toDataURL('image/png');
+        preview.src = imgURL;
+        preview.style.display = 'block';
+        imageDataInput.value = imgURL;
+    });
         </script>
     @endpush
 @endsection

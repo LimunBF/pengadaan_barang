@@ -20,6 +20,7 @@ class Transaksi extends Model
         'nama_pengirim_penerima',
         'waktu',
         'catatan',
+        'photo',
         'created_at',
         'updated_at',
     ];
