@@ -23,12 +23,12 @@
             @csrf
             <div class="mb-3">
                 <label for="proses" class="form-label">Proses</label>
+                <input type="hidden" id="proses" name="proses" value="">
                 <div class="d-flex gap-2">
-                    <button type="submit" name="proses" value="masuk" class="btn btn-primary">Barang Masuk</button>
-                    <button type="submit" name="proses" value="keluar" class="btn btn-danger">Barang Keluar</button>
+                    <button type="button" class="btn btn-primary" onclick="setValue('masuk', this)">Barang Masuk</button>
+                    <button type="button" class="btn btn-primary" onclick="setValue('keluar', this)">Barang Keluar</button>
                 </div>
             </div>
-            
 
             <div class="mb-3">
                 <label for="id_barang" class="form-label">Scan QR Code / Masukkan ID Barang</label>
@@ -89,17 +89,7 @@
                         data-bs-target="#fotoBarangModal">
                 </div>
             </div>
-            <div class="container">
-                <h3>Ambil Foto</h3>
-                <div>
-                    <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px;"></video>
-                    <canvas id="canvas" style="display: none;"></canvas>
-                </div>
-                <button id="capture" class="btn btn-primary mt-3">Ambil Foto</button>
-                <button id="save" class="btn btn-success mt-3">Simpan Foto</button>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-success">Submit</button>
         </form>
     </div>
 
@@ -121,11 +111,18 @@
     </div>
 
     {{--FOTO BUKTI BARANG--}}
-    
 
     {{-- JavaScript --}}
     @push('scripts')
         <script>
+            function setValue(value, button) {
+                document.getElementById('proses').value = value;
+                // Menambahkan kelas aktif untuk menunjukkan tombol yang dipilih
+                const buttons = document.querySelectorAll('.d-flex .btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            }
+
             document.getElementById('id_barang').addEventListener('change', function() {
                 let idBarang = this.value;
 
@@ -199,7 +196,6 @@
                 });
             });
 
-
             // Fungsi untuk mengosongkan form barang
             function clearBarangForm() {
                 document.getElementById('nama_barang').value = '';
@@ -210,56 +206,6 @@
                 document.getElementById('foto-barang').src = placeholder;
                 document.getElementById('modal-foto-barang').src = placeholder;
             }
-
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureButton = document.getElementById('capture');
-    const saveButton = document.getElementById('save');
-    const context = canvas.getContext('2d');
-
-    // Akses kamera
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
-        })
-        .catch(error => {
-            console.error("Kamera tidak dapat diakses:", error);
-        });
-
-    // Ambil foto
-    captureButton.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Tampilkan foto yang diambil (opsional)
-        const imgURL = canvas.toDataURL('image/png');
-        const imgElement = document.createElement('img');
-        imgElement.src = imgURL;
-        imgElement.style.width = '100%';
-        document.body.appendChild(imgElement);
-    });
-
-    // Simpan foto
-    saveButton.addEventListener('click', () => {
-        const dataURL = canvas.toDataURL('image/png');
-        fetch('/save-photo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ image: dataURL })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-        })
-        .catch(error => {
-            console.error("Gagal menyimpan foto:", error);
-        });
-    });
-
         </script>
     @endpush
 @endsection

@@ -102,6 +102,20 @@
         .btn-success:hover {
             background-color: #045e54;
         }
+        /* Styling untuk tombol aktif dengan gradasi hijau */
+        .btn.active {
+            background: linear-gradient(135deg, #06615E 0%, #3A8E7B 100%); /* Gradasi hijau gelap ke hijau lebih cerah */
+            border: none; /* Menghilangkan border default */
+            color: white; /* Mengubah teks menjadi putih */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Menambahkan shadow */
+            transform: scale(1.05); /* Sedikit membesarkan tombol */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Transisi halus */
+        }
+
+        .btn.active:hover {
+            background: linear-gradient(135deg, #3A8E7B 0%, #06615E 100%); /* Membalik gradasi pada hover */
+            transform: scale(1.1); /* Membesarkan sedikit pada hover */
+        }
 
         /* Footer Styles */
         footer {
