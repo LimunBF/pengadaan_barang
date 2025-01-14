@@ -93,10 +93,11 @@
             <div class="col-md-6 mb-3">
                 <label for="foto_barang" class="form-label">Foto Bukti</label>
                 <div>
-                    <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px;"></video>
+                    <button type="button" id="open-camera" class="btn btn-primary mb-3">Buka Kamera</button>
+                    <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px; display: none;"></video>
                     <canvas id="canvas" style="display: none;"></canvas>
                 </div>
-                <button type="button" id="capture" class="btn btn-primary mt-3">Ambil Foto</button>
+                <button type="button" id="capture" class="btn btn-primary mt-3" style="display: none;">Ambil Foto</button>
                 <input type="hidden" id="image_data" name="image_data">
                 <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3" style="display: none; max-width: 200px;">
             </div>
@@ -219,31 +220,36 @@
                 document.getElementById('modal-foto-barang').src = placeholder;
             }
 
+            const openCameraButton = document.getElementById('open-camera');
             const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureButton = document.getElementById('capture');
-    const imageDataInput = document.getElementById('image_data');
-    const preview = document.getElementById('preview');
-    const context = canvas.getContext('2d');
+            const canvas = document.getElementById('canvas');
+            const captureButton = document.getElementById('capture');
+            const imageDataInput = document.getElementById('image_data');
+            const preview = document.getElementById('preview');
+            const context = canvas.getContext('2d');
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
-        })
-        .catch(error => {
-            console.error("Kamera tidak dapat diakses:", error);
-        });
+            openCameraButton.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                        captureButton.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error("Kamera tidak dapat diakses:", error);
+                    });
+            });
 
-    captureButton.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            captureButton.addEventListener('click', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const imgURL = canvas.toDataURL('image/png');
-        preview.src = imgURL;
-        preview.style.display = 'block';
-        imageDataInput.value = imgURL;
-    });
+                const imgURL = canvas.toDataURL('image/png');
+                preview.src = imgURL;
+                preview.style.display = 'block';
+                imageDataInput.value = imgURL;
+            });
         </script>
     @endpush
 @endsection
