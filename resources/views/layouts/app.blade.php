@@ -89,6 +89,14 @@
             border: none;
         }
 
+        .btn-group-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Jarak antar tombol */
+            align-items: center;
+            justify-content: center;
+        }
+
         .btn-primary:hover {
             background-color: #e38e29;
             transform: scale(1.05);
@@ -115,6 +123,29 @@
         .btn.active:hover {
             background: linear-gradient(135deg, #3A8E7B 0%, #06615E 100%); /* Membalik gradasi pada hover */
             transform: scale(1.1); /* Membesarkan sedikit pada hover */
+        }
+
+        /* Uniform button styling */
+        .uniform-btn {
+            width: 100%; /* Lebar tombol sesuai dengan container */
+            min-width: 90px; /* Memberikan lebar minimum untuk memastikan tombol seragam */
+            max-width: 90px; /* Memberikan lebar minimum untuk memastikan tombol seragam */
+            padding: 8px; /* Menambahkan ruang di dalam tombol */
+            font-size: 0.9rem; /* Menyesuaikan ukuran font */
+            text-align: center; /* Teks rata tengah */
+            display: inline-block; /* Membuat tombol tetap inline tetapi seragam */
+            white-space: nowrap; /* Menghindari teks terputus ke baris baru */
+            border-radius: 5px; /* Konsistensi dengan tombol lainnya */
+            transition: all 0.2s ease-in-out; /* Animasi halus saat hover */
+        }
+
+        .uniform-btn:hover {
+            transform: scale(1.02); /* Sedikit membesar saat hover */
+        }
+
+        .uniform-btn:disabled {
+            opacity: 0.6; /* Memberikan efek disabled */
+            cursor: not-allowed;
         }
 
         /* Footer Styles */
