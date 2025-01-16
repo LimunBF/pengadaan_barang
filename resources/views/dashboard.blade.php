@@ -25,116 +25,132 @@
                 <label for="proses" class="form-label">Proses</label>
                 <input type="hidden" id="proses" name="proses" value="">
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" onclick="setValue('masuk', this)">Barang Masuk</button>
-                    <button type="button" class="btn btn-primary" onclick="setValue('keluar', this)">Barang Keluar</button>
+                    <button type="button" class="btn btn-primary" onclick="setValue('masuk', this); console.log('Klik Masuk');">Barang Masuk</button>
+                    <button type="button" class="btn btn-primary" onclick="setValue('keluar', this); console.log('Klik Keluar');">Barang Keluar</button>
                 </div>
             </div>
-
-            <div class="mb-3">
-                <label for="id_barang" class="form-label">Scan QR Code / Masukkan ID Barang</label>
-                <div class="input-group">
-                    <input type="text" id="id_barang" name="id_barang" class="form-control"
-                        value="{{ $barang->id_barang ?? '' }}" placeholder="Scan QR atau masukkan ID barang" readonly>
+        
+            <div id="form-container" style="display: none;">
+                <div class="mb-3">
+                    <label for="id_barang" class="form-label">Scan QR Code / Masukkan ID Barang</label>
+                    <div class="input-group">
+                        <input type="text" id="id_barang" name="id_barang" class="form-control"
+                            value="{{ $barang->id_barang ?? '' }}" placeholder="Scan QR atau masukkan ID barang" readonly>
+                    </div>
                 </div>
-            </div>
-
-            {{-- Autofill Fields --}}
-            <div class="mb-3">
-                <label for="nama_barang" class="form-label">Nama Barang</label>
-                <input type="text" id="nama_barang" name="nama_barang" class="form-control"
-                    value="{{ $barang->nama_barang ?? '' }}" readonly>
-            </div>
-            <div class="mb-3">
-                <label for="jenis_barang" class="form-label">Jenis Barang</label>
-                <input type="text" id="jenis_barang" name="jenis_barang" class="form-control"
-                    value="{{ $barang->jenis_barang ?? '' }}" readonly>
-            </div>
-
-            <div class="mb-3">
-                <label for="kuantitas" class="form-label">
-                    Stok Saat Ini: <span id="stok-gudang" class="badge bg-info text-dark">{{ $barang->stok ?? 0 }}</span>
-                </label>
-                <input type="number" id="kuantitas" name="kuantitas" class="form-control"
-                    placeholder="Masukkan jumlah stok baru" min="0" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="lokasi_rak" class="form-label">Lokasi Rak</label>
-                <input type="text" id="lokasi_rak" name="lokasi_rak" class="form-control"
-                    value="{{ $barang->lokasi_rak ?? '' }}" placeholder="Masukkan lokasi rak" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="nama_pengirim_penerima" class="form-label">Nama Pengirim/Penerima</label>
-                <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-control" required>
-                    <option value="joko">Joko</option>
-                    <option value="rizki">Rizki</option>
-                    <option value="limun">Limun</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="catatan" class="form-label">Catatan Tambahan</label>
-                <textarea id="catatan" name="catatan" class="form-control" rows="3"></textarea>
-            </div>
-
-            {{-- Tampilan Foto Barang --}}
-            <div class="mb-3">
-                <label for="foto_barang" class="form-label">Foto Barang</label>
-                <div>
-                    <img id="foto-barang"
-                        src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
-                        alt="Foto Barang" class="img-thumbnail"
-                        style="max-width: 300px; max-height: 300px; cursor: pointer;" data-bs-toggle="modal"
-                        data-bs-target="#fotoBarangModal">
+        
+                {{-- Autofill Fields --}}
+                <div class="mb-3">
+                    <label for="nama_barang" class="form-label">Nama Barang</label>
+                    <input type="text" id="nama_barang" name="nama_barang" class="form-control"
+                        value="{{ $barang->nama_barang ?? '' }}" readonly>
                 </div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="foto_barang" class="form-label">Foto Bukti</label>
-                <div>
-                    <button type="button" id="open-camera" class="btn btn-primary mb-3">Buka Kamera</button>
-                    <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px; display: none;"></video>
-                    <canvas id="canvas" style="display: none;"></canvas>
+                <div class="mb-3">
+                    <label for="jenis_barang" class="form-label">Jenis Barang</label>
+                    <input type="text" id="jenis_barang" name="jenis_barang" class="form-control"
+                        value="{{ $barang->jenis_barang ?? '' }}" readonly>
                 </div>
-                <button type="button" id="capture" class="btn btn-primary mt-3" style="display: none;">Ambil Foto</button>
-                <input type="hidden" id="image_data" name="image_data">
-                <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3" style="display: none; max-width: 200px;">
+        
+                <div class="mb-3">
+                    <label for="kuantitas" class="form-label">
+                        Stok Saat Ini: <span id="stok-gudang" class="badge bg-info text-dark">{{ $barang->stok ?? 0 }}</span>
+                    </label>
+                    <input type="number" id="kuantitas" name="kuantitas" class="form-control"
+                        placeholder="Masukkan jumlah stok baru" min="0" required>
+                </div>
+        
+                <div class="mb-3">
+                    <label for="lokasi_rak" class="form-label">Lokasi Rak</label>
+                    <input type="text" id="lokasi_rak" name="lokasi_rak" class="form-control"
+                        value="{{ $barang->lokasi_rak ?? '' }}" placeholder="Masukkan lokasi rak" required>
+                </div>
+        
+                <div class="mb-3">
+                    <label for="nama_pengirim_penerima" class="form-label">Nama Pengirim/Penerima</label>
+                    <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-control" required>
+                        <option value="joko">Joko</option>
+                        <option value="rizki">Rizki</option>
+                        <option value="limun">Limun</option>
+                    </select>
+                </div>
+        
+                <div class="mb-3">
+                    <label for="catatan" class="form-label">Catatan Tambahan</label>
+                    <textarea id="catatan" name="catatan" class="form-control" rows="3"></textarea>
+                </div>
+        
+                {{-- Tampilan Foto Barang --}}
+                <div class="mb-3">
+                    <label for="foto_barang" class="form-label">Foto Barang</label>
+                    <div>
+                        <img id="foto-barang"
+                            src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
+                            alt="Foto Barang" class="img-thumbnail"
+                            style="max-width: 300px; max-height: 300px; cursor: pointer;" data-bs-toggle="modal"
+                            data-bs-target="#fotoBarangModal">
+                    </div>
+                </div>
+        
+                <div class="col-md-6 mb-3">
+                    <label for="foto_barang" class="form-label">Foto Bukti</label>
+                    <div>
+                        <button type="button" id="open-camera" class="btn btn-primary mb-3">Buka Kamera</button>
+                        <video id="video" autoplay style="border: 1px solid #ccc; width: 100%; max-width: 480px; display: none;"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+                    <button type="button" id="capture" class="btn btn-primary mt-3" style="display: none;">Ambil Foto</button>
+                    <input type="hidden" id="image_data" name="image_data">
+                    <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3" style="display: none; max-width: 200px;">
+                </div>
+        
+                <button type="submit" class="btn btn-success">Submit</button>
             </div>
-
-            <button type="submit" class="btn btn-success">Submit</button>
         </form>
-    </div>
-
-    {{-- Modal Zoom Gambar --}}
-    <div class="modal fade" id="fotoBarangModal" tabindex="-1" aria-labelledby="fotoBarangModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="fotoBarangModalLabel">Foto Barang</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="modal-foto-barang"
-                        src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
-                        alt="Foto Barang" class="img-fluid">
+        
+        {{-- Modal Zoom Gambar --}}
+        <div class="modal fade" id="fotoBarangModal" tabindex="-1" aria-labelledby="fotoBarangModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="fotoBarangModalLabel">Foto Barang</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modal-foto-barang"
+                            src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
+                            alt="Foto Barang" class="img-fluid">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     {{--FOTO BUKTI BARANG--}}
 
     {{-- JavaScript --}}
     @push('scripts')
         <script>
-            function setValue(value, button) {
-                document.getElementById('proses').value = value;
-                // Menambahkan kelas aktif untuk menunjukkan tombol yang dipilih
-                const buttons = document.querySelectorAll('.d-flex .btn');
-                buttons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+             document.addEventListener('DOMContentLoaded', function () {
+        function setValue(value, button) {
+            document.getElementById('proses').value = value;
+
+            // Tambahkan kelas aktif untuk tombol
+            const buttons = document.querySelectorAll('.d-flex .btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Tampilkan form
+            const formContainer = document.getElementById('form-container');
+            if (formContainer) {
+                console.log("Form ditemukan di DOM.");
+                formContainer.style.display = 'block';
+            } else {
+                console.error("Form tidak ditemukan di DOM.");
             }
+        }
+
+        // Attach setValue to global scope for inline usage
+        window.setValue = setValue;
+    });
 
             document.getElementById('id_barang').addEventListener('change', function() {
                 let idBarang = this.value;
@@ -174,6 +190,16 @@
                         clearBarangForm();
                     });
             });
+            document.addEventListener('DOMContentLoaded', () => {
+    const formContainer = document.getElementById('form-container');
+    if (formContainer) {
+        console.log("Form-container ditemukan di DOM.");
+    } else {
+        console.error("Form-container tidak ditemukan di DOM.");
+    }
+});
+
+
 
             document.addEventListener('DOMContentLoaded', function () {
                 // Ambil nilai id_barang dari input
@@ -252,5 +278,14 @@
                 imageDataInput.value = imgURL;
             });
         </script>
+        <style>
+            #form-container {
+                display: none;
+            }
+        
+            #form-container.show {
+                display: block;
+            }
+        </style>
     @endpush
 @endsection
