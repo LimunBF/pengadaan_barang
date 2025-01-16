@@ -9,8 +9,11 @@ use App\Services\QRCodeService;
 
 class DaftarBarangController extends Controller
 {
+
     public function index(Request $request)
     {
+        // Ambil semua data barang dari database
+        $barang = Barang::all();
         // Reset edit mode jika berasal dari halaman lain
         if ($request->headers->get('referer') && parse_url($request->headers->get('referer'), PHP_URL_PATH) !== '/barang') {
             session()->forget('edit_id');

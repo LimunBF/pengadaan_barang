@@ -16,6 +16,14 @@ use App\Services\QRCodeService;
 
 class BarangController extends Controller
 {
+    public function index()
+    {
+        // Ambil semua data barang dari database
+        $barang = Barang::all();
+        // Kirim data ke view index.blade.php
+        return view('barang.index', compact('barang'));
+    }
+
     public function create()
     {
         do {
