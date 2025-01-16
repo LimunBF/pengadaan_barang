@@ -21,8 +21,34 @@
 @endif
 
 <div class="table-responsive">
+    <div class="container-fluid mb-3">
+        <div class="row g-3">
+            <!-- Searchbox -->
+            <div class="col-lg-4 col-md-6">
+                <label for="searchBox" class="form-label">Cari Nama Barang:</label>
+                <input type="text" id="searchBox" class="form-control" placeholder="Ketik nama barang...">
+            </div>
+
+            <!-- Filter Range Stok -->
+            <div class="col-lg-4 col-md-6">
+                <label for="stokRange" class="form-label">Filter Stok:</label>
+                <div class="d-flex">
+                    <input type="number" id="stokMin" class="form-control me-2" placeholder="Min">
+                    <input type="number" id="stokMax" class="form-control" placeholder="Max">
+                </div>
+            </div>
+
+            <!-- Filter Lokasi Rak -->
+            <div class="col-lg-4 col-md-12">
+                <label for="lokasiRakFilter" class="form-label">Filter Lokasi Rak:</label>
+                <select id="lokasiRakFilter" class="form-control">
+                    <option value="">Semua Rak</option>
+                </select>
+            </div>
+        </div>
+    </div>
     <table class="table table-bordered table-striped">
-        <thead class="table">
+        <thead>
             <tr>
                 <th style="text-align: center;">ID Barang</th>
                 <th style="text-align: center;">Nama Barang</th>
@@ -43,15 +69,14 @@
                     <span data-bs-toggle="tooltip" title="{{ $barang['jenis_barang'] }}">
                         {{ Str::limit($barang['jenis_barang'], 15) }}
                     </span>
-                </td>            
+                </td>
                 <td style="text-align: center;">
                     @if ($barang->barang && $barang->barang->foto_barang)
-                    <img src="{{ $barang->barang && $barang->barang->foto_barang ? $barang->barang->foto_barang : asset('images/placeholder.jpg') }}" 
-                        alt="Foto {{ $barang->nama_barang }}" style="width: 100px; height: auto;">
+                    <img src="{{ $barang->barang->foto_barang }}" alt="Foto {{ $barang['nama_barang'] }}" style="width: 100px; height: auto;">
                     @else
-                        <span>Tidak ada foto</span>
+                    <span>Tidak ada foto</span>
                     @endif
-                </td>                   
+                </td>
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
@@ -59,11 +84,11 @@
                     <button class="btn btn-sm btn-primary" onclick="openEditModal({{ $barang['id_barang'] }}, '{{ $barang['nama_barang'] }}', '{{ $barang['lokasi_rak'] }}', {{ $barang['stok'] }}, '{{ $barang['satuan'] }}')" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>
-                </td>            
+                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" style="text-align: center;">Tidak ada data barang</td>
+                <td colspan="8" style="text-align: center;">Tidak ada data barang</td>
             </tr>
             @endforelse
         </tbody>
@@ -144,6 +169,66 @@
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         })
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchBox = document.getElementById('searchBox');
+        const stokMin = document.getElementById('stokMin');
+        const stokMax = document.getElementById('stokMax');
+        const lokasiRakFilter = document.getElementById('lokasiRakFilter');
+        const tableRows = document.querySelectorAll('tbody tr');
+
+        // Populasi pilihan lokasi rak
+        const lokasiRakOptions = new Set([...tableRows].map(row => row.querySelector('td:nth-child(5)').textContent.trim()));
+        lokasiRakOptions.forEach(option => {
+            const newOption = document.createElement('option');
+            newOption.value = option;
+            newOption.textContent = option;
+            lokasiRakFilter.appendChild(newOption);
+        });
+
+        // Fungsi untuk filter tabel
+        function filterTable() {
+            const searchValue = searchBox.value.toLowerCase();
+            const minStok = stokMin.value ? parseInt(stokMin.value) : null;
+            const maxStok = stokMax.value ? parseInt(stokMax.value) : null;
+            const selectedRak = lokasiRakFilter.value;
+
+            tableRows.forEach(row => {
+                const namaBarang = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const stok = parseInt(row.querySelector('td:nth-child(6)').textContent);
+                const lokasiRak = row.querySelector('td:nth-child(5)').textContent;
+
+                let isMatch = true;
+
+                // Filter Nama Barang
+                if (searchValue && !namaBarang.includes(searchValue)) {
+                    isMatch = false;
+                }
+
+                // Filter Range Stok
+                if (minStok !== null && stok < minStok) {
+                    isMatch = false;
+                }
+                if (maxStok !== null && stok > maxStok) {
+                    isMatch = false;
+                }
+
+                // Filter Lokasi Rak
+                if (selectedRak && lokasiRak !== selectedRak) {
+                    isMatch = false;
+                }
+
+                // Tampilkan atau sembunyikan baris
+                row.style.display = isMatch ? '' : 'none';
+            });
+        }
+
+        // Event listeners
+        searchBox.addEventListener('input', filterTable);
+        stokMin.addEventListener('input', filterTable);
+        stokMax.addEventListener('input', filterTable);
+        lokasiRakFilter.addEventListener('change', filterTable);
     });
 </script>
 @endpush
