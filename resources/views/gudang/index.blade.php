@@ -20,38 +20,55 @@
 </script>
 @endif
 
-<table class="table table-bordered table-striped">
-    <thead class="table">
-        <tr>
-            <th style="text-align: center;">ID Barang</th>
-            <th style="text-align: center;">Nama Barang</th>
-            <th style="text-align: center;">Jenis Barang</th>
-            <th style="text-align: center;">Lokasi Rak</th>
-            <th style="text-align: center;">Stok</th>
-            <th style="text-align: center;">Satuan</th>
-            <th style="text-align: center;">Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse ($gudangs as $barang)
-        <tr>
-            <td style="text-align: center;">{{ $barang['id_barang'] }}</td>
-            <td>{{ $barang['nama_barang'] }}</td>
-            <td>{{ $barang['jenis_barang'] }}</td>
-            <td style="text-align: center;">{{ $barang['lokasi_rak'] }}</td>
-            <td style="text-align: center;">{{ $barang['stok'] }}</td>
-            <td style="text-align: center;">{{ $barang['satuan'] }}</td>
-            <td style="text-align: center;">
-                <button class="btn btn-primary btn-sm" onclick="openEditModal({{ $barang['id_barang'] }}, '{{ $barang['nama_barang'] }}', '{{ $barang['lokasi_rak'] }}', {{ $barang['stok'] }}, '{{ $barang['satuan'] }}')">Edit</button>
-            </td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="7" style="text-align: center;">Tidak ada data barang</td>
-        </tr>
-        @endforelse
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead class="table">
+            <tr>
+                <th style="text-align: center;">ID Barang</th>
+                <th style="text-align: center;">Nama Barang</th>
+                <th style="text-align: center;">Jenis Barang</th>
+                <th style="text-align: center;">Foto Barang</th>
+                <th style="text-align: center;">Lokasi Rak</th>
+                <th style="text-align: center;">Stok</th>
+                <th style="text-align: center;">Satuan</th>
+                <th style="text-align: center;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($gudangs as $barang)
+            <tr>
+                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['id_barang'] }}">{{ $barang['id_barang'] }}</td>
+                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['nama_barang'] }}">{{ Str::limit($barang['nama_barang'], 20) }}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <span data-bs-toggle="tooltip" title="{{ $barang['jenis_barang'] }}">
+                        {{ Str::limit($barang['jenis_barang'], 15) }}
+                    </span>
+                </td>            
+                <td style="text-align: center;">
+                    @if ($barang->barang && $barang->barang->foto_barang)
+                    <img src="{{ $barang->barang && $barang->barang->foto_barang ? $barang->barang->foto_barang : asset('images/placeholder.jpg') }}" 
+                        alt="Foto {{ $barang->nama_barang }}" style="width: 100px; height: auto;">
+                    @else
+                        <span>Tidak ada foto</span>
+                    @endif
+                </td>                   
+                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
+                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
+                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <button class="btn btn-sm btn-primary" onclick="openEditModal({{ $barang['id_barang'] }}, '{{ $barang['nama_barang'] }}', '{{ $barang['lokasi_rak'] }}', {{ $barang['stok'] }}, '{{ $barang['satuan'] }}')" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </td>            
+            </tr>
+            @empty
+            <tr>
+                <td colspan="7" style="text-align: center;">Tidak ada data barang</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 
 <!-- Modal untuk Edit -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -121,5 +138,12 @@
         modalInstance = new bootstrap.Modal(document.getElementById('editModal'));
         modalInstance.show();
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
 </script>
 @endpush
