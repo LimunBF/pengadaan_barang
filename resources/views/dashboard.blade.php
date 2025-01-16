@@ -22,7 +22,7 @@
         <form method="POST" action="{{ route('transaksi.store') }}" autocomplete="off">
             @csrf
             <div class="mb-3">
-                <label for="proses" class="form-label">Proses</label>
+                <label for="proses" class="form-label">Prosess</label>
                 <input type="hidden" id="proses" name="proses" value="">
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-primary" onclick="setValue('masuk', this); console.log('Klik Masuk');">Barang Masuk</button>
