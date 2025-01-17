@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GudangExport;
 use Illuminate\Http\Request;
 use App\Models\Gudang; // Import model Gudang
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class GudangController extends Controller
 {
@@ -136,5 +140,9 @@ class GudangController extends Controller
         $gudang->delete();
 
         return redirect()->route('gudang.index')->with('success', 'Barang berhasil dihapus.');
+    }
+
+    public function exportGudang(){
+        return Excel::download(new GudangExport, 'data-gudang.xlsx');
     }
 }

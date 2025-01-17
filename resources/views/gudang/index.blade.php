@@ -4,6 +4,7 @@
 
 @section('content')
 <h1 class="mb-4">Data Gudang</h1>
+<a href="/export-excel" class="btn btn-success mb-5 ">Export ke Excel</a>
 
 <!-- SweetAlert Notifikasi -->
 @if (session('success'))
