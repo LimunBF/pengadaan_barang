@@ -73,11 +73,14 @@
                 </td>
                 <td style="text-align: center;">
                     @if ($barang->barang && $barang->barang->foto_barang)
-                    <img src="{{ $barang->barang->foto_barang }}" alt="Foto {{ $barang['nama_barang'] }}" style="width: 100px; height: auto;">
+                    <img src="{{ $barang->barang->foto_barang }}" 
+                        alt="Foto {{ $barang->nama_barang }}" 
+                        style="width: 100px; height: auto; cursor: pointer;" 
+                        onclick="openImageModal('{{ $barang->barang->foto_barang }}')">
                     @else
                     <span>Tidak ada foto</span>
                     @endif
-                </td>
+                </td>                
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
                 <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
@@ -136,6 +139,22 @@
         </div>
     </div>
 </div>
+
+<!-- Modal untuk memperbesar gambar -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Foto Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <!-- Gambar akan diisi dengan JavaScript -->
+                <img id="imageModalContent" src="" class="img-fluid" alt="Foto Barang">
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -175,6 +194,19 @@
             return new bootstrap.Tooltip(tooltipTriggerEl)
         })
     });
+
+        /**
+     * Membuka modal untuk menampilkan gambar besar
+     * @param {string} imageUrl - URL gambar
+     */
+    function openImageModal(imageUrl) {
+        // Set gambar ke dalam modal
+        document.getElementById('imageModalContent').src = imageUrl;
+
+        // Tampilkan modal
+        const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        imageModal.show();
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
         const searchBox = document.getElementById('searchBox');

@@ -129,6 +129,7 @@ return [
 
     'aliases' => [
         'Excel' => Maatwebsite\Excel\ExcelServiceProvider::class,
+        'Str' => Illuminate\Support\Str::class,
     ],
 
 ];
