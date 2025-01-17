@@ -93,6 +93,10 @@
             @endforelse
         </tbody>
     </table>
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $gudangs->links('pagination::bootstrap-5') }}
+    </div>
 </div>
 
 <!-- Modal untuk Edit -->

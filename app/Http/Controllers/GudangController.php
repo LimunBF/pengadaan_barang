@@ -16,6 +16,9 @@ class GudangController extends Controller
         // Ambil data dari tabel gudang
         $gudangs = Gudang::all();
 
+        // Ambil data dari tabel gudang dengan pagination
+        $gudangs = Gudang::paginate(15);
+
         // Kirim data ke view
         return view('gudang.index', compact('gudangs'));
     }

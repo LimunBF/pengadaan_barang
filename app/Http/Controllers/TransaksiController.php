@@ -12,9 +12,17 @@ class TransaksiController extends Controller
     public function index()
     {
         $transaksi = Transaksi::all();
-        return view('transaksi.index', compact('transaksi'));
+        $transaksi = Transaksi::with('barang')->get();
+        $tanggalPertama = Transaksi::orderBy('waktu', 'asc')->value('waktu');
+        $tanggalTerakhir = Transaksi::orderBy('waktu', 'desc')->value('waktu');
+    
+        // Format tanggal menjadi YYYY-MM-DD
+        $tanggalPertama = $tanggalPertama ? date('Y-m-d', strtotime($tanggalPertama)) : null;
+        $tanggalTerakhir = $tanggalTerakhir ? date('Y-m-d', strtotime($tanggalTerakhir)) : null;
+    
+        return view('transaksi.index', compact('transaksi', 'tanggalPertama', 'tanggalTerakhir'));
     }
-
+    
     public function masuk()
     {
         $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();

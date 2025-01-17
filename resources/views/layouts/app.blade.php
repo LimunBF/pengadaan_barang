@@ -79,6 +79,21 @@
         }
         
         /* Button Styling */
+        .btn-large {
+            font-size: 1.2rem;
+            padding: 12px 30px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #F9A33E;
+            color: white;
+            border: none;
+        }
+
+        .btn-large:hover {
+            background-color: #e38e29;
+        }
+
         .btn {
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -196,20 +211,48 @@
             border: 1px solid #ddd;
         }
 
-        /* Button Styling */
-        .btn-large {
-            font-size: 1.2rem;
-            padding: 12px 30px;
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            background-color: #F9A33E;
-            color: white;
-            border: none;
+        /* Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
 
-        .btn-large:hover {
-            background-color: #e38e29;
+        .pagination .page-item {
+            margin: 0 5px; /* Memberi jarak antar tombol */
+        }
+
+        .pagination .page-link {
+            color: #06615E; /* Warna utama pagination */
+            font-weight: bold;
+            border: 1px solid #ddd;
+            border-radius: 50%; /* Membuat tombol berbentuk bulat */
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #06615E;
+            color: white;
+            border-color: #06615E;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #F9A33E;
+            color: white;
+            border-color: #F9A33E;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+            cursor: not-allowed;
         }
 
         /* Responsiveness */
@@ -233,7 +276,11 @@
                 margin-top: 20px;
                 padding: 20px;
             }
-        }
+            .pagination .page-link {
+                font-size: 0.8rem;
+                width: 30px;
+                height: 30px;
+            }
     </style>
 </head>
 <body>
