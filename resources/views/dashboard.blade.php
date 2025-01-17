@@ -7,8 +7,8 @@
         <label for="proses" class="form-label fw-bold">Proses</label>
         <input type="hidden" id="proses" name="proses" value="">
         <div class="d-flex gap-3">
-            <button type="button" class="btn btn-outline-primary px-4" onclick="setValue('masuk', this);">Barang Masuk</button>
-            <button type="button" class="btn btn-outline-secondary px-4" onclick="setValue('keluar', this);">Barang Keluar</button>
+            <button type="button" class="btn btn-primary px-4" onclick="setValue('masuk', this);">Barang Masuk</button>
+            <button type="button" class="btn btn-primary px-4" onclick="setValue('keluar', this);">Barang Keluar</button>
         </div>
     </div>
 
