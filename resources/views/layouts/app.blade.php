@@ -155,6 +155,8 @@
             text-align: center;
             padding: 20px 0;
             margin-top: 40px;
+            width: 100%;
+            
         }
 
         footer p {
