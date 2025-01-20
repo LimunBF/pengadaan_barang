@@ -25,7 +25,7 @@ class GudangExport implements FromCollection, WithHeadings,WithMapping
             'Foto Barang',
             'Lokasi Rak',
             'Stok',
-            'Satuan'
+            'satuan'
         ];
     }
     public function map($gudang): array
