@@ -6,6 +6,7 @@ use App\Exports\GudangExport;
 use Illuminate\Http\Request;
 use App\Models\Gudang; // Import model Gudang
 use Maatwebsite\Excel\Excel as ExcelExcel;
+use Illuminate\Support\Facades\Log; // Import namespace Log
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -114,20 +115,30 @@ class GudangController extends Controller
 
     public function updatePartial(Request $request, $id)
     {
-        // Validasi hanya untuk kolom yang diedit
+        // Pastikan ID memiliki panjang 4 digit
+        $id = str_pad($id, 4, '0', STR_PAD_LEFT);
+    
+        // Logging untuk memastikan ID yang diterima
+        // Log::info('ID setelah padding:', ['id' => $id]);
+    
+        // Validasi input
         $request->validate([
             'lokasi_rak' => 'nullable|string|max:255',
             'stok' => 'nullable|integer|min:0',
             'satuan' => 'nullable|string|max:255',
         ]);
     
-        // Cari data barang berdasarkan ID
-        $gudang = Gudang::findOrFail($id);
+        // Cari data berdasarkan ID
+        $gudang = Gudang::where('id_barang', $id)->first();
+        if (!$gudang) {
+            // Log::error('Barang tidak ditemukan dengan ID:', ['id' => $id]);
+            return redirect()->route('gudang.index')->withErrors(['error' => 'Barang tidak ditemukan.']);
+        }
     
-        // Perbarui hanya kolom yang diedit
+        // Log::info('Barang ditemukan:', ['gudang' => $gudang]);
+    
+        // Update data
         $gudang->update($request->only(['lokasi_rak', 'stok', 'satuan']));
-    
-        // Flash message untuk SweetAlert
         return redirect()->route('gudang.index')->with('success', 'Data berhasil diperbarui.');
     }    
 
