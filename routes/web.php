@@ -22,10 +22,7 @@ Route::put('/gudang/edit/{id}', [GudangController::class, 'updatePartial'])->nam
 
 // Halaman Transaksi
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
-Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaksi.store');
-Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
-Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
-Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaksi.store'); // Hanya satu rute POST
 Route::get('/transaksi/masuk', [TransaksiController::class, 'masuk'])->name('transaksi.masuk');
 Route::get('/transaksi/keluar', [TransaksiController::class, 'keluar'])->name('transaksi.keluar');
 
@@ -66,12 +63,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/barcode-data', function () {
     return view('barcode.barcode-data');
 })->name('barcode.data');
-
-
 Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');
-Route::post('/photo/store', [PhotoController::class, 'store'])->name('photo.store');
-Route::post('/transaksi/store', [PhotoController::class, 'store'])->name('transaksi.store');
 
+
+Route::post('/photo/store', [PhotoController::class, 'store'])->name('photo.store');
 
 //route export excel
 Route::get('/export-excel', [GudangController::class,'exportGudang']);
