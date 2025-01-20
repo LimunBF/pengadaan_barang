@@ -21,6 +21,7 @@
         </select>
     </form>
 
+<div class="table-responsive">
     <!-- Tabel Daftar Barang -->
     <table class="table table-bordered">
         <thead>
@@ -125,7 +126,10 @@
                                 </form>
                             @endif
                         </div>
-                    </td>                    
+                    </td>                   
+                </tr>
+                <tr>
+                    <td colspan="8" style="text-align: center;">Tidak ada data barang</td>
                 </tr>
             @endforeach
         </tbody>
@@ -164,6 +168,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
 
@@ -210,4 +215,22 @@
             modalImage.src = imageUrl; // Set gambar ke modal
         });
     </script>
+
+    <style>
+         .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Mencegah tabel merusak tata letak di perangkat kecil */
+    .table {
+        min-width: 600px; /* Atur sesuai dengan kebutuhan */
+    }
+
+    /* Membatasi gambar agar tidak terlalu besar */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    </style>
 @endpush
