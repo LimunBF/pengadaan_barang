@@ -6,6 +6,7 @@
     <meta name="description" content="Aplikasi Pengelolaan Gudang Diskominfo Madiun">
     <meta name="author" content="Your Name">
     <title>@yield('title') - Pengelolaan Gudang</title>
+    @vite(['resources/css/tengah.css'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -184,6 +185,7 @@
             background-color: #ffffff;
             border-radius: 8px;
             overflow: hidden;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bayangan halus */
         }
 
         .table thead {
@@ -192,9 +194,18 @@
         }
 
         .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             font-weight: bold;
         }
-
+        .table img {
+            border-radius: 4px; /* Membulatkan sudut gambar */
+            transition: transform 0.3s ease; /* Animasi zoom */
+        }
+        .table img:hover {
+            transform: scale(1.1); /* Zoom sedikit saat hover */
+        }
         .table tbody tr:nth-child(odd) {
             background-color: #f9f9f9;
         }
@@ -281,6 +292,7 @@
                 width: 30px;
                 height: 30px;
             }
+        }
     </style>
 </head>
 <body>

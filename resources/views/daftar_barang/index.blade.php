@@ -12,7 +12,6 @@
             {{ session('success') }}
         </div>
     @endif
-
     <form method="GET" action="{{ route('barang.index') }}" class="mb-3">
         <label for="filter" class="form-label">Tampilkan Barang Berdasarkan Kondisi:</label>
         <select name="filter" id="filter" class="form-select" onchange="this.form.submit()">
@@ -35,104 +34,106 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($barang as $item)
-                <tr id="row-{{ $item->id_barang }}" @if($item->kondisi == 'dihapus') class="text-muted" @endif>
-                    <td style="text-align: center; vertical-align: middle;">{{ $item->id_barang }}</td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        @if (session('edit_id') == $item->id_barang)
-                            <form action="{{ route('barang.update', $item->id_barang) }}" method="POST" enctype="multipart/form-data" class="d-inline">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="nama_barang" value="{{ $item->nama_barang }}" class="form-control form-control-sm text-center" placeholder="Nama Barang" required>
-                        @else
-                            <span>{{ $item->nama_barang }}</span>
-                        @endif
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        @if (session('edit_id') == $item->id_barang)
-                            <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control form-control-sm text-center" placeholder="Jenis Barang" required>
-                        @else
-                            <span>{{ $item->jenis_barang }}</span>
-                        @endif
-                    </td>                    
-                    <td style="text-align: center; vertical-align: middle;">
-                        @if (session('edit_id') == $item->id_barang)
-                            <div>
-                                <img id="preview-{{ $item->id_barang }}" 
-                                    src="{{ $item->foto_barang ? $item->foto_barang : '#' }}" 
-                                    alt="Gambar Barang" 
-                                    width="100" 
-                                    class="{{ $item->foto_barang ? 'mb-2' : 'd-none' }}" 
-                                    style="cursor: pointer;" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#photoModal" 
-                                    data-bs-whatever="{{ asset($item->foto_barang) }}">
-                            </div>
-                            <label for="upload-{{ $item->id_barang }}" class="btn btn-sm btn-primary mt-2">Ganti Gambar</label>
-                            <input id="upload-{{ $item->id_barang }}" type="file" name="foto_barang" class="d-none"
-                                onchange="previewImage(this, 'preview-{{ $item->id_barang }}')">
-                        @else
-                            @if ($item->foto_barang)
-                                <img src="{{ $item->foto_barang }}?{{ time() }}" 
-                                    alt="Gambar Barang" 
-                                    width="100" 
-                                    style="cursor: pointer;" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#photoModal" 
-                                    data-bs-whatever="{{ asset($item->foto_barang) }}">
-                            @else
-                                <span>Tidak ada gambar</span>
-                            @endif
-                        @endif
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        @if ($item->qr_code_path)
-                            <!-- Gambar QR Code -->
-                            <img src="{{ asset($item->qr_code_path) }}" alt="QR Code" width="100" style="cursor: pointer;"
-                                data-bs-toggle="modal" data-bs-target="#qrModal" data-bs-id="{{ $item->id_barang }}"
-                                data-bs-image="{{ asset($item->qr_code_path) }}">
-
-                            <!-- Tombol Download QR Code -->
-                            @if ($item->kondisi != 'dihapus')
-                                <br>
-                                <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}"
-                                    class="btn btn-primary btn-sm mt-2">Download QR Code</a>
-                            @endif
-                        @else
-                            Tidak ada QR Code
-                        @endif
-                    </td>
-                    <td style="align-items: center; vertical-align: middle;" class="text-center">
-                        <div class="btn-group-vertical w-100">
-                            @if (session('edit_id') == $item->id_barang)
-                                <button type="submit" class="btn btn-success btn-sm uniform-btn">Simpan</button>
-                                </form>
-                                <form action="{{ route('barang.cancel_edit', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-secondary btn-sm uniform-btn">Batal</button>
-                                </form>
-                            @elseif($item->kondisi == 'dihapus')
-                                <button class="btn btn-light btn-sm uniform-btn" disabled>Barang Dihapus</button>
-                            @else
-                                <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-warning btn-sm uniform-btn">Edit</button>
-                                </form>
-                                <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm uniform-btn"
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
-                                </form>
-                            @endif
-                        </div>
-                    </td>                   
-                </tr>
+            @if ($barang->isEmpty())
                 <tr>
                     <td colspan="8" style="text-align: center;">Tidak ada data barang</td>
                 </tr>
-            @endforeach
-        </tbody>
+            @else
+                @foreach ($barang as $item)
+                    <tr id="row-{{ $item->id_barang }}" @if($item->kondisi == 'dihapus') class="text-muted" @endif>
+                        <td style="text-align: center; vertical-align: middle;">{{ $item->id_barang }}</td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if (session('edit_id') == $item->id_barang)
+                                <form action="{{ route('barang.update', $item->id_barang) }}" method="POST" enctype="multipart/form-data" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="nama_barang" value="{{ $item->nama_barang }}" class="form-control form-control-sm text-center" placeholder="Nama Barang" required>
+                                @else
+                                    <span>{{ $item->nama_barang }}</span>
+                                @endif
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if (session('edit_id') == $item->id_barang)
+                                <input type="text" name="jenis_barang" value="{{ $item->jenis_barang }}" class="form-control form-control-sm text-center" placeholder="Jenis Barang" required>
+                            @else
+                                <span>{{ $item->jenis_barang }}</span>
+                            @endif
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if (session('edit_id') == $item->id_barang)
+                                <div>
+                                    <img id="preview-{{ $item->id_barang }}" 
+                                        src="{{ $item->foto_barang ? $item->foto_barang : '#' }}" 
+                                        alt="Gambar Barang" 
+                                        width="100" 
+                                        class="{{ $item->foto_barang ? 'mb-2' : 'd-none' }}" 
+                                        style="cursor: pointer;" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#photoModal" 
+                                        data-bs-whatever="{{ asset($item->foto_barang) }}">
+                                </div>
+                                <label for="upload-{{ $item->id_barang }}" class="btn btn-sm btn-primary mt-2">Ganti Gambar</label>
+                                <input id="upload-{{ $item->id_barang }}" type="file" name="foto_barang" class="d-none"
+                                    onchange="previewImage(this, 'preview-{{ $item->id_barang }}')">
+                            @else
+                                @if ($item->foto_barang)
+                                    <img src="{{ $item->foto_barang }}?{{ time() }}" 
+                                        alt="Gambar Barang" 
+                                        width="140" 
+                                        style="cursor: pointer;" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#photoModal" 
+                                        data-bs-whatever="{{ asset($item->foto_barang) }}">
+                                @else
+                                    <span>Tidak ada gambar</span>
+                                @endif
+                            @endif
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if ($item->qr_code_path)
+                                <!-- Gambar QR Code -->
+                                <img src="{{ asset($item->qr_code_path) }}?{{ time() }}" alt="QR Code" width="100" style="cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#qrModal" data-bs-id="{{ $item->id_barang }}"
+                                    data-bs-image="{{ asset($item->qr_code_path) }}?{{ time() }}">
+                                <!-- Tombol Download QR Code -->
+                                @if ($item->kondisi != 'dihapus')
+                                    <br>
+                                    <a href="{{ route('barang.downloadQRCode', $item->id_barang) }}"
+                                        class="btn btn-primary btn-sm mt-2">Download QR Code</a>
+                                @endif
+                            @else
+                                Tidak ada QR Code
+                            @endif
+                        </td>
+                        <td style="align-items: center; vertical-align: middle;" class="text-center">
+                            <div class="btn-group-vertical w-100">
+                                @if (session('edit_id') == $item->id_barang)
+                                    <button type="submit" class="btn btn-success btn-sm uniform-btn">Simpan</button>
+                                    </form>
+                                    <form action="{{ route('barang.cancel_edit', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-secondary btn-sm uniform-btn">Batal</button>
+                                    </form>
+                                @elseif($item->kondisi == 'dihapus')
+                                    <button class="btn btn-light btn-sm uniform-btn" disabled>Barang Dihapus</button>
+                                @else
+                                    <form action="{{ route('barang.edit_mode', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning btn-sm uniform-btn">Edit</button>
+                                    </form>
+                                    <form action="{{ route('barang.destroy', $item->id_barang) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm uniform-btn"
+                                            onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">Hapus</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            @endif
+        </tbody>        
     </table>
 </div>
 

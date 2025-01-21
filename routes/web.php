@@ -66,7 +66,5 @@ Route::get('/barcode-data', function () {
 Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('proses.scan');
 
 
-Route::post('/photo/store', [PhotoController::class, 'store'])->name('photo.store');
-
 //route export excel
 Route::get('/export-excel', [GudangController::class,'exportGudang']);

@@ -13,22 +13,6 @@
     <!-- Filter Section -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <label for="searchbox">Search</label>
-            <input type="text" id="searchbox" class="form-control" placeholder="Search...">
-        </div>
-        <div class="col-md-3">
-            <label for="filterJenisTransaksi">Jenis Transaksi</label>
-            <select id="filterJenisTransaksi" class="form-control">
-                <option value="">Semua</option>
-                <option value="masuk">Masuk</option>
-                <option value="keluar">Keluar</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="filterNamaPengirim">Nama Pengirim/Penerima</label>
-            <input type="text" id="filterNamaPengirim" class="form-control" placeholder="Cari nama pengirim/penerima">
-        </div>
-        <div class="col-md-3">
             <label for="filterTanggalMulai">Rentang Waktu</label>
             <div class="d-flex">
                 <input 
@@ -46,41 +30,83 @@
                     min="{{ $tanggalPertama }}" 
                     max="{{ $tanggalTerakhir }}">
             </div>
-        </div>        
+        </div>   
+        <div class="col-md-3">
+            <label for="searchbox">Search</label>
+            <input type="text" id="searchbox" class="form-control" placeholder="Search...">
+        </div>
+        <div class="col-md-3">
+            <label for="filterNamaPengirim">Nama Pengirim/Penerima</label>
+            <input type="text" id="filterNamaPengirim" class="form-control" placeholder="Cari nama pengirim/penerima">
+        </div> 
+        <div class="col-md-3">
+            <label for="filterJenisTransaksi">Jenis Transaksi</label>
+            <select id="filterJenisTransaksi" class="form-control">
+                <option value="">Semua</option>
+                <option value="masuk">Masuk</option>
+                <option value="keluar">Keluar</option>
+            </select>
+        </div>    
     </div>
 
     <!-- Table Section -->
     <table class="table table-bordered" id="transaksiTable">
         <thead>
             <tr>
-                <th>ID Transaksi</th>
-                <th>Waktu</th>
-                <th>Id Barang | Nama Barang</th>
-                <th>Jenis Transaksi</th>
-                <th>Kuantitas</th>
-                <th>Nama Pengirim / Penerima</th>
-                <th>Catatan</th>
-                <th>Photo</th>
+                <th class="tengah">ID</th>
+                <th class="tengah">Waktu</th>
+                <th class="tengah">Id Barang | Nama Barang</th>
+                <th class="tengah">Jenis Transaksi</th>
+                <th class="tengah">Kuantitas</th>
+                <th class="tengah">Nama Petugas</th>
+                <th class="tengah">Catatan</th>
+                <th class="tengah">Bukti Foto</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($transaksi as $t)
                 <tr>
-                    <td>{{ $t->id_transaksi }}</td>
-                    <td>{{ $t->waktu }}</td>
-                    <td>{{ $t->id_barang }} | {{ $t->barang->nama_barang ?? 'Tidak Ditemukan' }}</td>
-                    <td>{{ $t->tipe_transaksi }}</td>
-                    <td>{{ $t->kuantitas }}</td>
-                    <td>{{ $t->nama_pengirim_penerima }}</td>
-                    <td>{{ $t->catatan }}</td>
-                    <td>{{ $t->photo }}</td>
+                    <td class="tengah-kolom">{{ $t->id_transaksi }}</td>
+                    <td class="tengah-kolom">{{ $t->waktu }}</td>
+                    <td class="tengah-kolom">{{ $t->id_barang }} | {{ $t->barang->nama_barang ?? 'Tidak Ditemukan' }}</td>
+                    <td class="tengah-kolom">{{ $t->tipe_transaksi }}</td>
+                    <td class="tengah-kolom">{{ $t->kuantitas }}</td>
+                    <td class="tengah-kolom">{{ $t->nama_pengirim_penerima }}</td>
+                    <td class="tengah-kolom">{{ $t->catatan }}</td>
+                    <td class="tengah-kolom">
+                        @if ($t->photo)
+                            <img src="{{ $t->photo }}" alt="Foto Bukti" style="max-width: 100px; max-height: 100px; cursor: pointer;"
+                                data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('{{ $t->photo }}')">
+                        @else
+                            <img src="{{ asset('images/placeholder.png') }}" alt="Tidak ada foto" style="max-width: 100px; max-height: 100px;">
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Foto Bukti</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Foto Bukti" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
 <script>
+    function showImageModal(imageUrl) {
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = imageUrl;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const searchbox = document.getElementById('searchbox');
         const filterJenisTransaksi = document.getElementById('filterJenisTransaksi');
@@ -100,13 +126,22 @@
             rows.forEach(row => {
                 const idTransaksi = row.cells[0].textContent.toLowerCase();
                 const waktu = new Date(row.cells[1].textContent);
+                const idBarangNamaBarang = row.cells[2].textContent.toLowerCase();
                 const jenisTransaksi = row.cells[3].textContent.toLowerCase();
+                const kuantitas = row.cells[4].textContent.toLowerCase();
                 const namaPengirim = row.cells[5].textContent.toLowerCase();
+                const catatan = row.cells[6].textContent.toLowerCase();
 
                 let showRow = true;
 
                 // Filter berdasarkan searchbox
-                if (searchValue && !idTransaksi.includes(searchValue) && !namaPengirim.includes(searchValue)) {
+                if (
+                    searchValue &&
+                    !idTransaksi.includes(searchValue) &&
+                    !idBarangNamaBarang.includes(searchValue) &&
+                    !kuantitas.includes(searchValue) &&
+                    !catatan.includes(searchValue)
+                ) {
                     showRow = false;
                 }
 

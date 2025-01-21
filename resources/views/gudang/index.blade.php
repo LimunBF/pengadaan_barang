@@ -51,27 +51,27 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th style="text-align: center;">ID Barang</th>
-                <th style="text-align: center;">Nama Barang</th>
-                <th style="text-align: center;">Jenis Barang</th>
-                <th style="text-align: center;">Foto Barang</th>
-                <th style="text-align: center;">Lokasi Rak</th>
-                <th style="text-align: center;">Stok</th>
-                <th style="text-align: center;">Satuan</th>
-                <th style="text-align: center;">Aksi</th>
+                <th class="tengah">ID Barang</th>
+                <th class="tengah">Nama Barang</th>
+                <th class="tengah">Jenis Barang</th>
+                <th class="tengah">Foto Barang</th>
+                <th class="tengah">Lokasi Rak</th>
+                <th class="tengah">Stok</th>
+                <th class="tengah">Satuan</th>
+                <th class="tengah">Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($gudangs as $barang)
             <tr>
-                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['id_barang'] }}">{{ $barang['id_barang'] }}</td>
-                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['nama_barang'] }}">{{ Str::limit($barang['nama_barang'], 20) }}</td>
-                <td style="text-align: center; vertical-align: middle;">
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['id_barang'] }}">{{ $barang['id_barang'] }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['nama_barang'] }}">{{ Str::limit($barang['nama_barang'], 20) }}</td>
+                <td class="tengah-kolom">
                     <span data-bs-toggle="tooltip" title="{{ $barang['jenis_barang'] }}">
                         {{ Str::limit($barang['jenis_barang'], 15) }}
                     </span>
                 </td>
-                <td style="text-align: center;">
+                <td class="tengah">
                     @if ($barang->barang && $barang->barang->foto_barang)
                     <img src="{{ $barang->barang->foto_barang }}" 
                         alt="Foto {{ $barang->nama_barang }}" 
@@ -81,10 +81,10 @@
                     <span>Tidak ada foto</span>
                     @endif
                 </td>                
-                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
-                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
-                <td style="text-align: center; vertical-align: middle;" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
-                <td style="text-align: center; vertical-align: middle;">
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
+                <td class="tengah-kolom">
                     <button class="btn btn-sm btn-primary" onclick="openEditModal({{ $barang['id_barang'] }}, '{{ $barang['nama_barang'] }}', '{{ $barang['lokasi_rak'] }}', {{ $barang['stok'] }}, '{{ $barang['satuan'] }}')" title="Edit">
                         <i class="bi bi-pencil"></i>
                     </button>
@@ -92,7 +92,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center;">Tidak ada data barang</td>
+                <td colspan="8" class="tengah">Tidak ada data barang</td>
             </tr>
             @endforelse
         </tbody>
