@@ -29,4 +29,8 @@ class Transaksi extends Model
     {
         return $this->belongsTo(Barang::class, 'id_barang', 'id_barang');
     }
+    public function setNamaPengirimPenerimaAttribute($value)
+    {
+        $this->attributes['nama_pengirim_penerima'] = strtoupper($value);
+    }
 }

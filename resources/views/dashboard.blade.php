@@ -123,108 +123,142 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Toast Notification
-        const showToast = (icon, title, text, timer = 3000) => {
-            Swal.fire({
-                icon,
-                title,
-                text,
-                timer,
-                showConfirmButton: false,
-            }).then(() => {
-                if (icon === 'success') {
-                    window.location.href = "{{ route('transaksi.index') }}";
+            // Inisialisasi Toast Notification
+            const showToast = (icon, title, text, timer = 3000) => {
+                Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    timer,
+                    showConfirmButton: false,
+                }).then(() => {
+                    if (icon === 'success') {
+                        window.location.href = "{{ route('transaksi.index') }}";
+                    }
+                });
+            };
+
+            // Tampilkan notifikasi berdasarkan session
+            @if (session('success'))
+                showToast('success', 'Berhasil!', '{{ session('success') }}', 2000);
+            @endif
+            @if (session('error'))
+                showToast('error', 'Gagal!', '{{ session('error') }}', 3000);
+            @endif
+
+            // Fungsi Mengatur Nilai Form
+            const setValue = (value, button) => {
+                document.getElementById('proses').value = value;
+
+                // Highlight tombol aktif
+                document.querySelectorAll('.d-flex .btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Tampilkan form
+                const formContainer = document.getElementById('form-container');
+                if (formContainer) {
+                    formContainer.style.display = 'block';
+                } else {
+                    console.error("Form tidak ditemukan di DOM.");
+                }
+            };
+
+            // Attach ke global scope
+            window.setValue = setValue;
+
+            // Validasi Form Sebelum Submit
+            document.querySelector('form').addEventListener('submit', function () {
+                const proses = document.getElementById('proses').value;
+                const kuantitas = document.getElementById('kuantitas').value;
+                const imageData = document.getElementById('image_data').value;
+                const catatan = document.getElementById('catatan').value.trim();
+
+                if (!proses) {
+                    alert('Silakan pilih proses (Barang Masuk atau Keluar) terlebih dahulu.');
+                    return false;
+                }
+                if (!kuantitas) {
+                    alert('Silakan masukkan jumlah kuantitas.');
+                    return false;
+                }
+                // Cek jika catatan kosong
+                if (!catatan) {
+                    event.preventDefault(); // Cegah form dari submit
+                    showToast('error', 'Gagal!', 'Silakan isi catatan sebelum mengirim.');
+                    return;
+                }
+                if (!imageData) {
+                    event.preventDefault(); // Cegah form dari submit
+                    showToast('error', 'Gagal!', 'Silakan ambil foto bukti sebelum mengirim.');
+                    return;
                 }
             });
-        };
 
-        // Tampilkan notifikasi berdasarkan session
-        @if (session('success'))
-            showToast('success', 'Berhasil!', '{{ session('success') }}', 2000);
-        @endif
-        @if (session('error'))
-            showToast('error', 'Gagal!', '{{ session('error') }}', 3000);
-        @endif
+            // Kamera dan Screenshot
+            const openCameraButton = document.getElementById('open-camera');
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const captureButton = document.getElementById('capture');
+            const preview = document.getElementById('preview');
+            const imageDataInput = document.getElementById('image_data');
 
-        // Fungsi Mengatur Nilai Form
-        const setValue = (value, button) => {
-            document.getElementById('proses').value = value;
+            let stream = null; // Untuk menyimpan stream kamera
+            let timer = null;  // Untuk menyimpan timer
 
-            // Highlight tombol aktif
-            document.querySelectorAll('.d-flex .btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
+            // Fungsi untuk menutup kamera
+            const stopCamera = () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop()); // Hentikan semua track kamera
+                    stream = null;
+                }
+                video.style.display = 'none';
+                captureButton.style.display = 'none';
+                clearTimeout(timer); // Hentikan timer jika ada
 
-            // Tampilkan form
-            const formContainer = document.getElementById('form-container');
-            if (formContainer) {
-                formContainer.style.display = 'block';
-            } else {
-                console.error("Form tidak ditemukan di DOM.");
-            }
-        };
-
-        // Attach ke global scope
-        window.setValue = setValue;
-
-        // Validasi Form Sebelum Submit
-        document.querySelector('form').addEventListener('submit', function () {
-            const proses = document.getElementById('proses').value;
-            const kuantitas = document.getElementById('kuantitas').value;
-            const imageData = document.getElementById('image_data').value;
-            const catatan = document.getElementById('catatan').value.trim();
-
-            if (!proses) {
-                alert('Silakan pilih proses (Barang Masuk atau Keluar) terlebih dahulu.');
-                return false;
-            }
-            if (!kuantitas) {
-                alert('Silakan masukkan jumlah kuantitas.');
-                return false;
-            }
-            // Cek jika catatan kosong
-            if (!catatan) {
-                event.preventDefault(); // Cegah form dari submit
-                showToast('error', 'Gagal!', 'Silakan isi catatan sebelum mengirim.');
-                return;
-            }
-            if (!imageData) {
-                event.preventDefault(); // Cegah form dari submit
-                showToast('error', 'Gagal!', 'Silakan ambil foto bukti sebelum mengirim.');
-                return;
-            }
-        });
-
-        // Kamera dan Screenshot
-        const openCameraButton = document.getElementById('open-camera');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureButton = document.getElementById('capture');
-        const preview = document.getElementById('preview');
-        const imageDataInput = document.getElementById('image_data');
-
-        openCameraButton.addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    captureButton.style.display = 'block';
-                })
-                .catch(error => {
-                    alert("Tidak dapat mengakses kamera.");
-                    console.error("Kamera gagal:", error);
+                // Tampilkan notifikasi dengan SweetAlert2
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Waktu Habis',
+                    text: 'Waktu pengambilan gambar telah habis. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
                 });
-        });
+            };
+            openCameraButton.addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(mediaStream => {
+                        stream = mediaStream;
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                        captureButton.style.display = 'block';
 
-        captureButton.addEventListener('click', () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imgURL = canvas.toDataURL('image/png');
-            preview.src = imgURL;
-            preview.style.display = 'block';
-            imageDataInput.value = imgURL;
+                        // Mulai timer untuk mematikan kamera otomatis setelah 30 detik
+                        timer = setTimeout(() => {
+                            stopCamera();
+                        }, 30000); // 30 detik
+                    })
+                    .catch(error => {
+                        alert("Tidak dapat mengakses kamera.");
+                        console.error("Kamera gagal:", error);
+                    });
+            });
+
+            captureButton.addEventListener('click', () => {
+                if (!stream) return; // Jika kamera tidak aktif, abaikan
+
+                // Tangkap gambar dari video
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const imgURL = canvas.toDataURL('image/png');
+                preview.src = imgURL;
+                preview.style.display = 'block';
+                imageDataInput.value = imgURL;
+
+                // Matikan kamera setelah mengambil gambar
+                stopCamera();
+            });
         });
-    });
     </script>
     <style>
         #form-container {

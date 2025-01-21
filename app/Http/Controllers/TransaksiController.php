@@ -71,7 +71,7 @@ class TransaksiController extends Controller
             $proses = $request->input('proses');
             $kuantitas = $request->input('kuantitas');
             $lokasi_rak = $request->input('lokasi_rak');
-            $nama_pengirim_penerima = $request->input('nama_pengirim_penerima');
+            $nama_pengirim_penerima = strtoupper($request->input('nama_pengirim_penerima'));
             $catatan = $request->input('catatan');
             $imageData = $request->input('image_data');
     
