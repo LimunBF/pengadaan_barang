@@ -21,7 +21,6 @@
 </script>
 @endif
 
-<div class="table-responsive">
     <div class="container-fluid mb-3">
         <div class="row g-3">
             <!-- Searchbox -->
@@ -48,6 +47,8 @@
             </div>
         </div>
     </div>
+    
+<div class="table-responsive">
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
