@@ -7,6 +7,7 @@ use App\Models\Gudang;
 use App\Models\Barang;
 use Illuminate\Support\Facades\Log;
 use App\Services\AuthService; // Tambahkan import AuthService
+use App\Models\Petugas; // Tambahkan di bagian atas
 
 class DashboardController extends Controller
 {
@@ -18,6 +19,8 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $barang = session('barang', null);
+        // Ambil data petugas dari tabel petugas
+        $petugas = Petugas::all();
     
         if ($barang) {
             // Ambil stok dari tabel Gudang berdasarkan id_barang
@@ -35,7 +38,7 @@ class DashboardController extends Controller
         }
     
         // Tampilkan halaman dashboard
-        return view('dashboard', compact('barang'));
+        return view('dashboard', compact('barang', 'petugas'));
     }
     
     public function createBarang()

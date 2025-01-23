@@ -57,10 +57,10 @@
             <label for="nama_pengirim_penerima" class="form-label fw-bold">Nama Pengirim/Penerima</label>
             <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-select" required>
                 <option value="" disabled selected>Pilih Pengirim/Penerima</option>
-                <option value="joko">Joko</option>
-                <option value="rizki">Rizki</option>
-                <option value="limun">Limun</option>
-            </select>
+                @foreach($petugas as $p)
+                    <option value="{{ $p->nama }}">{{ $p->nama }}</option>
+                @endforeach
+            </select>            
         </div>
 
         <div class="mb-3">
