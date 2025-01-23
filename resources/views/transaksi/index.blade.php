@@ -6,8 +6,8 @@
 
 
 <div class="container">
-    <h2>Daftar Transaksi</h2>
-    <button id="exportExcel" class="btn btn-success mb-3">Export to Excel</button>
+    <h1>Daftar Transaksi</h1>
+    <a id="exportExcel" class="btn btn-success mb-3">Export to Excel</a>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
