@@ -6,6 +6,11 @@
 <h1 class="mb-4">Data Gudang</h1>
 <a href="/export-excel" class="btn btn-success mb-5 ">Export ke Excel</a>
 
+<form action="{{ route('gudang.export') }}" method="GET">
+    <input type="hidden" name="search" value="{{ request('search') }}">
+    <button type="submit" class="btn btn-success">Export to Excessl</button>
+</form>
+
 <!-- SweetAlert Notifikasi -->
 @if (session('success'))
 <script>

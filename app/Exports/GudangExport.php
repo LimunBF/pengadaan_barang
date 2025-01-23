@@ -1,21 +1,27 @@
 <?php
-
 namespace App\Exports;
 
-use App\Models\Gudang;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class GudangExport implements FromCollection, WithHeadings,WithMapping
+class GudangExport implements FromCollection, WithHeadings, WithMapping
 {
+    protected $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
-        return Gudang::all();
+        return $this->data;
     }
+
     public function headings(): array
     {
         return [
@@ -25,9 +31,10 @@ class GudangExport implements FromCollection, WithHeadings,WithMapping
             'Foto Barang',
             'Lokasi Rak',
             'Stok',
-            'satuan'
+            'Satuan',
         ];
     }
+
     public function map($gudang): array
     {
         return [

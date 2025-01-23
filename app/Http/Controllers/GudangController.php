@@ -158,19 +158,21 @@ class GudangController extends Controller
         return redirect()->route('gudang.index')->with('success', 'Barang berhasil dihapus.');
     }
 
-    public function exportGudang(Request $request){
-        $filter = $request->get('filter');
 
-    // Query data sesuai filter
-    $gudangs = Gudang::when($filter, function ($query, $filter) {
-        if ($filter === 'ada') {
-            $query->where('stok', '>', 0); // Contoh filter stok ada
-        } elseif ($filter === 'kosong') {
-            $query->where('stok', '=', 0); // Contoh filter stok kosong
-        }
-    })->get();
 
-    // Ekspor data menggunakan GudangExport
-    return Excel::download(new GudangExport($gudangs), 'data-gudang.xlsx');
+
+public function export(Request $request)
+{
+    // Filter data berdasarkan query yang sama
+    $query = Gudang::query();
+
+    if ($request->filled('search')) {
+        $query->where('nama_barang', 'like', '%' . $request->search . '%');
     }
+
+    $data = $query->get();
+
+    // Kirim data yang sudah difilter ke export class
+    return Excel::download(new GudangExport($data), 'gudang.xlsx');
+}
 }
