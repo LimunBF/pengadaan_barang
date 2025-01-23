@@ -7,8 +7,7 @@
 
 <div class="container">
     <h2>Daftar Transaksi</h2>
-
-    <a href="#" id="exportTransaksiExcel" class="btn btn-success mb-5">Export ke Excel</a>
+    <button id="exportExcel" class="btn btn-success mb-3">Export to Excel</button>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -52,7 +51,7 @@
             </select>
         </div>    
     </div>
-
+    
     <!-- Table Section -->
 <div class="table-responsive">
     <table class="table table-bordered" id="transaksiTable">
@@ -112,6 +111,68 @@
         const modalImage = document.getElementById('modalImage');
         modalImage.src = imageUrl;
     }
+
+    document.getElementById('exportExcel').addEventListener('click', function () {
+        const rows = Array.from(document.querySelectorAll('#transaksiTable tbody tr'));
+        const filteredData = [];
+        let filterApplied = false;
+
+        // Cek apakah ada filter yang diterapkan
+        const searchValue = document.getElementById('searchbox').value.trim();
+        const jenisValue = document.getElementById('filterJenisTransaksi').value.trim();
+        const namaValue = document.getElementById('filterNamaPengirim').value.trim();
+        const tanggalMulai = document.getElementById('filterTanggalMulai').value.trim();
+        const tanggalAkhir = document.getElementById('filterTanggalAkhir').value.trim();
+
+        // Jika salah satu filter diisi, tandai filterApplied sebagai true
+        if (searchValue || jenisValue || namaValue || tanggalMulai || tanggalAkhir) {
+            filterApplied = true;
+        }
+
+        // Ambil data yang terlihat (hanya jika ada filter)
+        if (filterApplied) {
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    filteredData.push({
+                        id_transaksi: row.cells[0].textContent.trim(),
+                        waktu: row.cells[1].textContent.trim(),
+                        id_barang_nama_barang: row.cells[2].textContent.trim(),
+                        tipe_transaksi: row.cells[3].textContent.trim(),
+                        kuantitas: row.cells[4].textContent.trim(),
+                        nama_pengirim_penerima: row.cells[5].textContent.trim(),
+                        catatan: row.cells[6].textContent.trim(),
+                        photo: row.cells[7].querySelector('img')?.src || '',
+                    });
+                }
+            });
+        }
+
+        // Kirimkan data filter ke server
+        fetch('{{ route('transaksi.export') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            body: JSON.stringify({
+                filteredData: filterApplied ? filteredData : [], // Kirim data kosong jika tidak ada filter
+            }),
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Gagal mengekspor data.');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'transaksi.xlsx';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const searchbox = document.getElementById('searchbox');

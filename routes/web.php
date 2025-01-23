@@ -13,6 +13,7 @@ use App\Http\Controllers\PhotoController;
 // Halaman Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
+Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
 
 // Halaman Gudang
 Route::resource('gudang', GudangController::class);
@@ -25,9 +26,9 @@ Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi
 Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaksi.store'); // Hanya satu rute POST
 Route::get('/transaksi/masuk', [TransaksiController::class, 'masuk'])->name('transaksi.masuk');
 Route::get('/transaksi/keluar', [TransaksiController::class, 'keluar'])->name('transaksi.keluar');
-
-
-Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
+// Untuk Export Excel Pada Transaksi
+Route::post('/transaksi/export', [TransaksiController::class, 'export'])->name('transaksi.export');
+// Route::get('/transaksi/export', [TransaksiController::class, 'export'])->name('transaksi.export');
 
 // Rute untuk halaman barang
 Route::get('/barang/create', [BarangController::class, 'create'])->name('barang.create');

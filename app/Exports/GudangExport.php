@@ -41,14 +41,14 @@ class GudangExport implements FromCollection, WithHeadings, WithMapping
     public function map($gudang): array
     {
         return [
-            $gudang->id,
+            $gudang->id_barang,
             $gudang->nama_barang,
             $gudang->jenis_barang,
             $gudang->photo,
             $gudang->lokasi_rak,
             $gudang->stok,
             $gudang->satuan,
-            optional($gudang->barang)->kode_qr,
+            optional($gudang->barang)->qr_code_path,
         ];
     }
 }

@@ -7,7 +7,12 @@ use App\Models\Gudang;
 use App\Models\Transaksi;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Exports\TransaksiExport;
 use App\Services\AuthService; // Tambahkan import AuthService
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransaksiController extends Controller
 {
@@ -22,14 +27,14 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with('barang')->get();
         $tanggalPertama = Transaksi::orderBy('waktu', 'asc')->value('waktu');
         $tanggalTerakhir = Transaksi::orderBy('waktu', 'desc')->value('waktu');
-    
+
         // Format tanggal menjadi YYYY-MM-DD
         $tanggalPertama = $tanggalPertama ? date('Y-m-d', strtotime($tanggalPertama)) : null;
         $tanggalTerakhir = $tanggalTerakhir ? date('Y-m-d', strtotime($tanggalTerakhir)) : null;
-    
+
         return view('transaksi.index', compact('transaksi', 'tanggalPertama', 'tanggalTerakhir'));
     }
-    
+
     public function masuk()
     {
         $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();
@@ -46,7 +51,7 @@ class TransaksiController extends Controller
     {
         Log::info('Data yang diterima di request:', $request->all()); // Debug data input
         Log::info('Data yang diterima:', $request->all());
-        Log::info('Data kuantitas:', ['kuantitas' => $request->input('kuantitas')]);        
+        Log::info('Data kuantitas:', ['kuantitas' => $request->input('kuantitas')]);
         try {
             // Validasi input manual
             $request->validate([
@@ -56,23 +61,23 @@ class TransaksiController extends Controller
                 'catatan' => 'nullable|string',
                 'image_data' => 'nullable|string', // Validasi untuk foto
             ]);
-    
+
             // Ambil data barang dari session
             $barang = session('barang');
             if (!$barang) {
                 return redirect()->back()->with('error', 'Data barang tidak ditemukan di session.');
             }
-    
+
             // Pastikan session barang memiliki semua data yang diperlukan
             if (!isset($barang['id_barang'], $barang['nama_barang'], $barang['jenis_barang'])) {
                 return redirect()->back()->with('error', 'Data barang di session tidak lengkap.');
             }
-    
+
             // Data dari session
             $id_barang = $barang['id_barang'];
             $nama_barang = $barang['nama_barang'];
             $jenis_barang = $barang['jenis_barang'];
-    
+
             // Data dari form
             $proses = $request->input('proses');
             $kuantitas = $request->input('kuantitas');
@@ -80,7 +85,7 @@ class TransaksiController extends Controller
             $nama_pengirim_penerima = strtoupper($request->input('nama_pengirim_penerima'));
             $catatan = $request->input('catatan');
             $imageData = $request->input('image_data');
-    
+
             // Proses penyimpanan gambar (jika ada)
             $photoUrl = null;
             if ($imageData) {
@@ -106,7 +111,7 @@ class TransaksiController extends Controller
                 $photoUrl = asset('storage/foto_bukti/' . $fileName);
             }
 
-    
+
             // Proses transaksi
             $gudang = Gudang::where('id_barang', $id_barang)->first();
             if ($proses === 'masuk') {
@@ -133,7 +138,7 @@ class TransaksiController extends Controller
                     return redirect()->back()->with('error', 'Barang tidak ditemukan di gudang.');
                 }
             }
-    
+
             // Simpan transaksi
             Transaksi::create([
                 'id_barang' => $id_barang,
@@ -144,11 +149,44 @@ class TransaksiController extends Controller
                 'catatan' => $catatan,
                 'photo' => $photoUrl,
             ]);
-    
+
             return redirect()->back()->with('success', 'Transaksi berhasil dicatat!');
         } catch (\Exception $e) {
             Log::error('Error pada transaksi store: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan transaksi.');
         }
-    }  
+    }
+    public function export(Request $request)
+    {
+        try {
+            // Ambil semua data transaksi
+            $allData = Transaksi::with('barang')->get();
+
+            // Ambil data terfilter dari request
+            $filteredData = collect($request->input('filteredData', []));
+
+            // Jika filteredData kosong, tambahkan pesan "Filter Tidak Digunakan"
+            if ($filteredData->isEmpty()) {
+                $filteredData = collect([
+                    [
+                        'id_transaksi' => '',
+                        'id_barang' => '',
+                        'nama_barang' => '',
+                        'jenis_transaksi' => '',
+                        'kuantitas' => '',
+                        'nama_pengirim_penerima' => '',
+                        'waktu' => '',
+                        'catatan' => '',
+                        'photo' => 'Filter Tidak Digunakan',
+                    ],
+                ]);
+            }
+
+            // Generate file Excel
+            return Excel::download(new TransaksiExport($allData, $filteredData), 'transaksi.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengekspor data: ' . $e->getMessage());
+        }
+    }
+  
 }
