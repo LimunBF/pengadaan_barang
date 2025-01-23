@@ -50,6 +50,7 @@
     </div>
 
     <!-- Table Section -->
+<div class="table-responsive">
     <table class="table table-bordered" id="transaksiTable">
         <thead>
             <tr>
@@ -100,6 +101,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 <script>
     function showImageModal(imageUrl) {
