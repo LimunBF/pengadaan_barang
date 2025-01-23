@@ -13,6 +13,7 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
 use App\Services\QRCodeService;
+use App\Services\AuthService; // Tambahkan import AuthService
 
 class BarangController extends Controller
 {
@@ -40,6 +41,7 @@ class BarangController extends Controller
     public function __construct(QRCodeService $qrCodeService)
     {
         $this->qrCodeService = $qrCodeService;
+        AuthService::checkLogin(); // Panggil pengecekan login
     }
 
     public function store(Request $request)

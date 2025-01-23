@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Barang;
 use Illuminate\Support\Facades\Log;
 use App\Services\QRCodeService;
+use App\Services\AuthService; // Tambahkan import AuthService
 
 class DaftarBarangController extends Controller
 {
-
     public function index(Request $request)
     {
         // Ambil semua data barang dari database
@@ -38,6 +38,7 @@ class DaftarBarangController extends Controller
     public function __construct(QRCodeService $qrCodeService)
     {
         $this->qrCodeService = $qrCodeService;
+        AuthService::checkLogin(); // Panggil pengecekan login
     }
 
     public function update(Request $request, $id_barang)

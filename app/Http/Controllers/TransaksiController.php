@@ -7,9 +7,15 @@ use App\Models\Gudang;
 use App\Models\Transaksi;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Services\AuthService; // Tambahkan import AuthService
 
 class TransaksiController extends Controller
 {
+    public function __construct()
+    {
+        AuthService::checkLogin(); // Panggil pengecekan login
+    }
+
     public function index()
     {
         $transaksi = Transaksi::all();

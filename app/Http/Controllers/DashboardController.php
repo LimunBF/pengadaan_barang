@@ -6,9 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Gudang;
 use App\Models\Barang;
 use Illuminate\Support\Facades\Log;
+use App\Services\AuthService; // Tambahkan import AuthService
 
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        AuthService::checkLogin(); // Panggil pengecekan login
+    }
+
     public function index(Request $request)
     {
         $barang = session('barang', null);

@@ -7,9 +7,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log; // Import namespace Log
 use App\Models\Barang;
 use Zxing\QrReader; // Import namespace untuk QR code reader
+use App\Services\AuthService; // Tambahkan import AuthService
 
 class ScanController extends Controller
 {
+    public function __construct()
+    {
+        AuthService::checkLogin(); // Panggil pengecekan login
+    }
     
     public function index(Request $request)
     {

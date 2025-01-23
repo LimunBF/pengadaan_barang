@@ -8,11 +8,16 @@ use App\Models\Gudang; // Import model Gudang
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Illuminate\Support\Facades\Log; // Import namespace Log
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\AuthService; // Tambahkan import AuthService
 
 
 class GudangController extends Controller
 {
-    
+    public function __construct()
+    {
+        AuthService::checkLogin(); // Panggil pengecekan login
+    }
+
     /**
      * Display a listing of the resource.
      */
