@@ -4,12 +4,11 @@
 
 @section('content')
 <h1 class="mb-4">Data Gudang</h1>
+
+<a href="#" id="exportGudangExcel" class="btn btn-success mb-5">Export ke Excsssel</a>
+
 <a href="/export-excel" class="btn btn-success mb-5 ">Export ke Excel</a>
 
-<form action="{{ route('gudang.export') }}" method="GET">
-    <input type="hidden" name="search" value="{{ request('search') }}">
-    <button type="submit" class="btn btn-success">Export to Excessl</button>
-</form>
 
 <!-- SweetAlert Notifikasi -->
 @if (session('success'))
@@ -273,5 +272,28 @@
         stokMax.addEventListener('input', filterTable);
         lokasiRakFilter.addEventListener('change', filterTable);
     });
+
+    //export excel
+    document.getElementById('exportGudangExcel').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const searchValue = document.getElementById('searchBox').value;
+    const stokMin = document.getElementById('stokMin').value;
+    const stokMax = document.getElementById('stokMax').value;
+    const lokasiRak = document.getElementById('lokasiRakFilter').value;
+
+    // Buat parameter filter
+    const filter = {
+        search: searchValue,
+        stok_min: stokMin,
+        stok_max: stokMax,
+        lokasi_rak: lokasiRak
+    };
+
+    // Redirect ke URL dengan query string
+    const queryParams = new URLSearchParams(filter).toString();
+    window.location.href = `/export-gudang?${queryParams}`;
+});
+
 </script>
 @endpush

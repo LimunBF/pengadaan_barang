@@ -68,4 +68,5 @@ Route::post('/proses-scan', [ScanController::class, 'processScan'])->name('prose
 
 //route export excel
 Route::get('/export-excel', [GudangController::class,'exportGudang']);
+Route::get('/export-gudang', [GudangController::class, 'exportGudang']);
 Route::get('/gudang/export', [GudangController::class, 'export'])->name('gudang.export');

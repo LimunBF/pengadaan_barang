@@ -161,18 +161,25 @@ class GudangController extends Controller
 
 
 
-public function export(Request $request)
-{
-    // Filter data berdasarkan query yang sama
-    $query = Gudang::query();
-
-    if ($request->filled('search')) {
-        $query->where('nama_barang', 'like', '%' . $request->search . '%');
+    public function exportGudang(Request $request)
+    {
+        $search = $request->get('search');
+        $stokMin = $request->get('stok_min');
+        $stokMax = $request->get('stok_max');
+        $lokasiRak = $request->get('lokasi_rak');
+    
+        $gudangs = Gudang::when($search, function ($query, $search) {
+            $query->where('nama_barang', 'like', "%$search%");
+        })->when($stokMin, function ($query, $stokMin) {
+            $query->where('stok', '>=', $stokMin);
+        })->when($stokMax, function ($query, $stokMax) {
+            $query->where('stok', '<=', $stokMax);
+        })->when($lokasiRak, function ($query, $lokasiRak) {
+            $query->where('lokasi_rak', $lokasiRak);
+        })->get();
+    
+        // Ekspor data menggunakan GudangExport
+        return Excel::download(new GudangExport($gudangs), 'data-gudang.xlsx');
     }
-
-    $data = $query->get();
-
-    // Kirim data yang sudah difilter ke export class
-    return Excel::download(new GudangExport($data), 'gudang.xlsx');
-}
+    
 }
