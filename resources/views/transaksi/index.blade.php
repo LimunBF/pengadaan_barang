@@ -3,8 +3,12 @@
 @section('title', 'Daftar Transaksi')
 
 @section('content')
+
+
 <div class="container">
     <h2>Daftar Transaksi</h2>
+
+    <a href="#" id="exportTransaksiExcel" class="btn btn-success mb-5">Export ke Excel</a>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

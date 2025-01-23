@@ -20,6 +20,8 @@ class GudangExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         return $this->data;
+        return $this->data->load('barang');
+    
     }
 
     public function headings(): array
@@ -32,6 +34,7 @@ class GudangExport implements FromCollection, WithHeadings, WithMapping
             'Lokasi Rak',
             'Stok',
             'Satuan',
+            'Kode Qr'
         ];
     }
 
@@ -45,6 +48,7 @@ class GudangExport implements FromCollection, WithHeadings, WithMapping
             $gudang->lokasi_rak,
             $gudang->stok,
             $gudang->satuan,
+            optional($gudang->barang)->kode_qr,
         ];
     }
 }

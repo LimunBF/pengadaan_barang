@@ -5,9 +5,8 @@
 @section('content')
 <h1 class="mb-4">Data Gudang</h1>
 
-<a href="#" id="exportGudangExcel" class="btn btn-success mb-5">Export ke Excsssel</a>
+<a href="#" id="exportGudangExcel" class="btn btn-success mb-5">Export ke Excel</a>
 
-<a href="/export-excel" class="btn btn-success mb-5 ">Export ke Excel</a>
 
 
 <!-- SweetAlert Notifikasi -->
