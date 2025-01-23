@@ -204,6 +204,7 @@
 
             let stream = null; // Untuk menyimpan stream kamera
             let timer = null;  // Untuk menyimpan timer
+            let isPhotoCaptured = false; // Menyimpan status apakah gambar telah diambil
 
             // Fungsi untuk menutup kamera
             const stopCamera = () => {
@@ -213,15 +214,20 @@
                 }
                 video.style.display = 'none';
                 captureButton.style.display = 'none';
-                clearTimeout(timer); // Hentikan timer jika ada
 
-                // Tampilkan notifikasi dengan SweetAlert2
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Waktu Habis',
-                    text: 'Waktu pengambilan gambar telah habis. Silakan coba lagi.',
-                    confirmButtonText: 'OK'
-                });
+                // Tampilkan notifikasi hanya jika kamera ditutup karena waktu habis
+                if (!isPhotoCaptured && timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Waktu Habis',
+                        text: 'Waktu pengambilan gambar telah habis. Silakan coba lagi.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+                // Reset status pengambilan gambar
+                isPhotoCaptured = false;
             };
             openCameraButton.addEventListener('click', () => {
                 navigator.mediaDevices.getUserMedia({ video: true })
@@ -255,9 +261,28 @@
                 preview.style.display = 'block';
                 imageDataInput.value = imgURL;
 
+                // Set status bahwa gambar berhasil diambil
+                isPhotoCaptured = true;
+
+                // Tampilkan notifikasi sukses
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Gambar berhasil diambil.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+
                 // Matikan kamera setelah mengambil gambar
                 stopCamera();
+
+                // Hentikan timer jika masih berjalan
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
             });
+
         });
     </script>
     <style>
