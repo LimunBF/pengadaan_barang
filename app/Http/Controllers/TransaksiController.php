@@ -165,7 +165,7 @@ class TransaksiController extends Controller
             // Ambil data terfilter dari request
             $filteredData = collect($request->input('filteredData', []));
 
-            // Jika filteredData kosong, tambahkan pesan "Filter Tidak Digunakan"
+            // Jika filteredData kosong, tambahkan placeholder
             if ($filteredData->isEmpty()) {
                 $filteredData = collect([
                     [
@@ -175,18 +175,32 @@ class TransaksiController extends Controller
                         'jenis_transaksi' => '',
                         'kuantitas' => '',
                         'nama_pengirim_penerima' => '',
-                        'waktu' => '',
+                        'waktu' => 'Filter Tidak Digunakan',
                         'catatan' => '',
-                        'photo' => 'Filter Tidak Digunakan',
+                        'photo' => '',
                     ],
                 ]);
             }
 
-            // Generate file Excel
-            return Excel::download(new TransaksiExport($allData, $filteredData), 'transaksi.xlsx');
+            // Mapping data dengan urutan kolom yang benar
+            $mappedFilteredData = $filteredData->map(function ($item) {
+                return [
+                    'id_transaksi' => $item['id_transaksi'] ?? '',
+                    'id_barang' => $item['id_barang'] ?? '',
+                    'nama_barang' => $item['nama_barang'] ?? '',
+                    'jenis_transaksi' => $item['jenis_transaksi'] ?? '',
+                    'kuantitas' => $item['kuantitas'] ?? '',
+                    'nama_pengirim_penerima' => $item['nama_pengirim_penerima'] ?? '',
+                    'waktu' => $item['waktu'] ?? '', // Pastikan data waktu terisi dengan benar
+                    'catatan' => $item['catatan'] ?? '', // Catatan terisi sesuai kolom
+                    'photo' => $item['photo'] ?? '', // Foto bukti pada kolom yang benar
+                ];
+            });
+
+            // Generate file Excel dengan data yang terfilter
+            return Excel::download(new TransaksiExport($allData, $mappedFilteredData), 'transaksi.xlsx');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengekspor data: ' . $e->getMessage());
         }
     }
-  
 }
