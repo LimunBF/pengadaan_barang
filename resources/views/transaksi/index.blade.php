@@ -134,14 +134,15 @@
             rows.forEach(row => {
                 if (row.style.display !== 'none') {
                     filteredData.push({
-                        id_transaksi: row.cells[0].textContent.trim(),
-                        waktu: row.cells[1].textContent.trim(),
-                        id_barang_nama_barang: row.cells[2].textContent.trim(),
-                        tipe_transaksi: row.cells[3].textContent.trim(),
-                        kuantitas: row.cells[4].textContent.trim(),
-                        nama_pengirim_penerima: row.cells[5].textContent.trim(),
-                        catatan: row.cells[6].textContent.trim(),
-                        photo: row.cells[7].querySelector('img')?.src || '',
+                        id_transaksi: row.cells[0].textContent.trim(), // ID Transaksi
+                        id_barang: row.cells[2].textContent.split('|')[0].trim(), // ID Barang (split dari "ID Barang | Nama Barang")
+                        nama_barang: row.cells[2].textContent.split('|')[1].trim(), // Nama Barang (split dari "ID Barang | Nama Barang")
+                        tipe_transaksi: row.cells[3].textContent.trim(), // Jenis Transaksi
+                        kuantitas: row.cells[4].textContent.trim(), // Kuantitas
+                        nama_pengirim_penerima: row.cells[5].textContent.trim(), // Nama Pengirim/Penerima
+                        waktu: row.cells[1].textContent.trim(), // Waktu
+                        catatan: row.cells[6].textContent.trim(), // Catatan
+                        photo: row.cells[7].querySelector('img')?.src || '', // Foto Bukti
                     });
                 }
             });
