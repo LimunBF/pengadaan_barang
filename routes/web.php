@@ -9,6 +9,7 @@ use App\Http\Controllers\DaftarBarangController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\PhotoController;
+use App\Http\Controllers\PetugasController;
 
 // Halaman Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -20,6 +21,12 @@ Route::resource('gudang', GudangController::class);
 Route::get('/gudang/{id}/stok', [GudangController::class, 'show']);
 Route::get('/gudang/{id}/stok', [GudangController::class, 'show'])->name('gudang.stok');
 Route::put('/gudang/edit/{id}', [GudangController::class, 'updatePartial'])->name('gudang.updatePartial');
+
+// Rute Untuk Fungsi CRUD Petugas
+Route::get('/petugas', [PetugasController::class, 'index'])->name('petugas.index');
+Route::post('/petugas', [PetugasController::class, 'store'])->name('petugas.store');
+Route::put('/petugas/{id}', [PetugasController::class, 'update'])->name('petugas.update');
+Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('petugas.destroy');
 
 // Halaman Transaksi
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
