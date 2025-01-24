@@ -61,17 +61,20 @@
 
             <!-- Section to display QR Code after saving -->
             @if (session('qr_code_url') && session('last_generated_id'))
-                <div class="mt-4 border-top pt-3">
-                    <h5>QR Code Barang</h5>
-                    <div class="text-center">
-                        <img src="{{ session('qr_code_url') }}" alt="QR Code" class="img-fluid" style="max-width: 150px;">
-                    </div>
-                    <div class="d-flex justify-content-center mt-3">
-                        <a href="{{ route('barang.download_qr', ['id_barang' => session('last_generated_id')]) }}" class="btn btn-success">
-                            Download QR Code
-                        </a>
-                    </div>
+            <div class="mt-4 border-top pt-3">
+                <h5 class="text-center text-primary"> QR Code Barang</h5>
+                <div class="text-center my-4">
+                    <img src="{{ session('qr_code_url') }}" alt="QR Code" class="img-fluid rounded shadow" style="max-width: 200px; border: 2px solid #007bff; padding: 5px;">
                 </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <a href="{{ route('barang.download_qr', ['id_barang' => session('last_generated_id')]) }}" class="btn btn-success me-2 shadow">
+                        Download QR Code
+                    </a>
+                    <a class="btn btn-primary shadow" href="{{ route('barcode.index') }}">
+                         Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
             @endif
         </div>
     </div>

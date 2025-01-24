@@ -124,6 +124,7 @@
         }
 
         .btn-success:hover {
+            transform: scale(1.05);
             background-color: #045e54;
         }
         /* Styling untuk tombol aktif dengan gradasi hijau */
@@ -315,7 +316,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                        <a class="nav-link" href="{{ route('barcode.index') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('barang.index') }}">Daftar Barang</a>

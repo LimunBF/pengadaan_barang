@@ -11,10 +11,14 @@ use App\Http\Controllers\ScanController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\PetugasController;
 
+
 // Halaman Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
 Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
+Route::get('/barcode', function () {
+    return view('barcode.barcode-data'); // Nama view harus sesuai dengan lokasi file
+})->name('barcode.index');
 
 // Halaman Gudang
 Route::resource('gudang', GudangController::class);
