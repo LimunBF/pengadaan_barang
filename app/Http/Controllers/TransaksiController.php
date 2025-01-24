@@ -108,7 +108,7 @@ class TransaksiController extends Controller
                 file_put_contents($filePath, $image);
 
                 // URL publik file (path ke public/storage)
-                $photoUrl = asset('storage/foto_bukti/' . $fileName);
+                $photoUrl = url('storage/foto_bukti/' . $fileName);
             }
 
 

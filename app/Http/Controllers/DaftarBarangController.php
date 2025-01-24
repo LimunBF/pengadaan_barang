@@ -63,7 +63,7 @@ class DaftarBarangController extends Controller
 
         if ($request->hasFile('foto_barang')) {
             if ($barang->foto_barang) {
-                $relativePath = str_replace(asset('storage'), '', $barang->foto_barang);
+                $relativePath = str_replace(url('storage'), '', $barang->foto_barang);
                 $oldImagePath = storage_path('app/public' . $relativePath);
 
                 if (file_exists($oldImagePath)) {
@@ -72,7 +72,7 @@ class DaftarBarangController extends Controller
             }
 
             $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
-            $fotoUrl = asset('storage/' . $fotoPath);
+            $fotoUrl = url('storage/' . $fotoPath);
             $dataUpdate['foto_barang'] = $fotoUrl;
         }
 
