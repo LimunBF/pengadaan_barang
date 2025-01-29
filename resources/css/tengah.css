@@ -6,3 +6,25 @@
     text-align: center; 
     vertical-align: middle;
 }
+/* Media query untuk layar kecil */
+@media (max-width: 576px) {
+    .table th, .table td {
+        font-size: 14px; /* Kecilkan ukuran font */
+    }
+    .table th {
+        white-space: nowrap; /* Jangan bungkus teks header */
+    }
+    .table td {
+        white-space: normal; /* Biarkan isi tabel membungkus */
+    }
+}
+
+/* Sesuaikan margin dan padding modal untuk layar kecil */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 10px; /* Kurangi margin */
+    }
+    .modal-content {
+        padding: 10px; /* Kurangi padding */
+    }
+}

@@ -39,15 +39,15 @@
         }
 
         .navbar-nav .nav-link {
-            color: #FFFFFF; /* Teks menjadi putih penuh */
-            font-weight: 500; /* Menambahkan sedikit ketebalan */
-            font-size: 1.1rem; /* Sedikit memperbesar font */
-            letter-spacing: 0.5px; /* Memberikan sedikit spasi antar huruf */
+            color: #FFFFFF;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
             transition: color 0.3s ease;
         }
 
         .navbar-nav .nav-link:hover {
-            color: #F9A33E; /* Memberikan aksen oranye pada hover */
+            color: #F9A33E;
         }
 
         .navbar-toggler-icon {
@@ -108,7 +108,7 @@
         .btn-group-vertical {
             display: flex;
             flex-direction: column;
-            gap: 8px; /* Jarak antar tombol */
+            gap: 8px;
             align-items: center;
             justify-content: center;
         }
@@ -127,7 +127,7 @@
             transform: scale(1.05);
             background-color: #045e54;
         }
-        /* Styling untuk tombol aktif dengan gradasi hijau */
+
         .btn.active {
             background: linear-gradient(135deg, #06615E 0%, #3A8E7B 100%); /* Gradasi hijau gelap ke hijau lebih cerah */
             border: none; /* Menghilangkan border default */
@@ -138,11 +138,10 @@
         }
 
         .btn.active:hover {
-            background: linear-gradient(135deg, #3A8E7B 0%, #06615E 100%); /* Membalik gradasi pada hover */
-            transform: scale(1.1); /* Membesarkan sedikit pada hover */
+            background: linear-gradient(135deg, #3A8E7B 0%, #06615E 100%);
+            transform: scale(1.1);
         }
 
-        /* Uniform button styling */
         .uniform-btn {
             width: 100%; /* Lebar tombol sesuai dengan container */
             min-width: 90px; /* Memberikan lebar minimum untuk memastikan tombol seragam */
@@ -157,11 +156,11 @@
         }
 
         .uniform-btn:hover {
-            transform: scale(1.02); /* Sedikit membesar saat hover */
+            transform: scale(1.02);
         }
 
         .uniform-btn:disabled {
-            opacity: 0.6; /* Memberikan efek disabled */
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
@@ -173,7 +172,6 @@
             padding: 20px 0;
             margin-top: 40px;
             width: 100%;
-            
         }
 
         footer p {
@@ -186,7 +184,7 @@
             background-color: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bayangan halus */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .table thead {
@@ -200,13 +198,16 @@
             z-index: 10;
             font-weight: bold;
         }
+
         .table img {
-            border-radius: 4px; /* Membulatkan sudut gambar */
-            transition: transform 0.3s ease; /* Animasi zoom */
+            border-radius: 4px;
+            transition: transform 0.3s ease;
         }
+
         .table img:hover {
-            transform: scale(1.1); /* Zoom sedikit saat hover */
+            transform: scale(1.1);
         }
+
         .table tbody tr:nth-child(odd) {
             background-color: #f9f9f9;
         }
@@ -231,14 +232,14 @@
         }
 
         .pagination .page-item {
-            margin: 0 5px; /* Memberi jarak antar tombol */
+            margin: 0 5px;
         }
 
         .pagination .page-link {
-            color: #06615E; /* Warna utama pagination */
+            color: #06615E;
             font-weight: bold;
             border: 1px solid #ddd;
-            border-radius: 50%; /* Membuat tombol berbentuk bulat */
+            border-radius: 50%;
             width: 40px;
             height: 40px;
             display: flex;
@@ -288,10 +289,69 @@
                 margin-top: 20px;
                 padding: 20px;
             }
+
             .pagination .page-link {
                 font-size: 0.8rem;
                 width: 30px;
                 height: 30px;
+            }
+
+            .navbar-brand img {
+                width: 50px;
+                height: 50px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .btn-large {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+
+            .table th, .table td {
+                font-size: 0.9rem;
+            }
+
+            .table img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 0.9rem;
+            }
+
+            .content-wrapper {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .btn-large {
+                font-size: 0.9rem;
+                padding: 8px 15px;
+            }
+
+            .table th, .table td {
+                font-size: 0.8rem;
+            }
+
+            .table img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .pagination .page-link {
+                width: 25px;
+                height: 25px;
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -302,7 +362,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <!-- Logo dan Nama Brand -->
-            <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('barcode.index') }}">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" width="70" height="70" class="me-2"> <!-- Logo -->
                 Pengelolaan Gudang
             </a>

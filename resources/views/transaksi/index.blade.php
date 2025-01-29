@@ -4,7 +4,6 @@
 
 @section('content')
 
-
 <div class="container">
     <h1>Daftar Transaksi</h1>
     <a id="exportExcel" class="btn btn-success mb-3">Export to Excel</a>
@@ -15,7 +14,7 @@
 
     <!-- Filter Section -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4    ">
             <label for="filterTanggalMulai">Rentang Waktu</label>
             <div class="d-flex">
                 <input 
@@ -28,7 +27,7 @@
                 <input 
                     type="date" 
                     id="filterTanggalAkhir" 
-                    class="form-control ms-2" 
+                    class="form-control" 
                     placeholder="Akhir"
                     min="{{ $tanggalPertama }}" 
                     max="{{ $tanggalTerakhir }}">
@@ -42,7 +41,7 @@
             <label for="filterNamaPengirim">Nama Pengirim/Penerima</label>
             <input type="text" id="filterNamaPengirim" class="form-control" placeholder="Cari nama pengirim/penerima">
         </div> 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="filterJenisTransaksi">Jenis Transaksi</label>
             <select id="filterJenisTransaksi" class="form-control">
                 <option value="">Semua</option>
@@ -53,59 +52,60 @@
     </div>
     
     <!-- Table Section -->
-<div class="table-responsive">
-    <table class="table table-bordered" id="transaksiTable">
-        <thead>
-            <tr>
-                <th class="tengah">ID</th>
-                <th class="tengah">Waktu</th>
-                <th class="tengah">Id Barang | Nama Barang</th>
-                <th class="tengah">Jenis Transaksi</th>
-                <th class="tengah">Kuantitas</th>
-                <th class="tengah">Nama Petugas</th>
-                <th class="tengah">Catatan</th>
-                <th class="tengah">Bukti Foto</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($transaksi as $t)
+    <div class="table-responsive">
+        <table class="table table-bordered" id="transaksiTable">
+            <thead>
                 <tr>
-                    <td class="tengah-kolom">{{ $t->id_transaksi }}</td>
-                    <td class="tengah-kolom">{{ $t->waktu }}</td>
-                    <td class="tengah-kolom">{{ $t->id_barang }} | {{ $t->barang->nama_barang ?? 'Tidak Ditemukan' }}</td>
-                    <td class="tengah-kolom">{{ $t->tipe_transaksi }}</td>
-                    <td class="tengah-kolom">{{ $t->kuantitas }}</td>
-                    <td class="tengah-kolom">{{ $t->nama_pengirim_penerima }}</td>
-                    <td class="tengah-kolom">{{ $t->catatan }}</td>
-                    <td class="tengah-kolom">
-                        @if ($t->photo)
-                            <img src="{{ $t->photo }}" alt="Foto Bukti" style="max-width: 100px; max-height: 100px; cursor: pointer;"
-                                data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('{{ $t->photo }}')">
-                        @else
-                            <img src="{{ asset('images/placeholder.png') }}" alt="Tidak ada foto" style="max-width: 100px; max-height: 100px;">
-                        @endif
-                    </td>
+                    <th class="tengah">ID</th>
+                    <th class="tengah">Waktu</th>
+                    <th class="tengah">Id Barang | Nama Barang</th>
+                    <th class="tengah">Jenis Transaksi</th>
+                    <th class="tengah">Kuantitas</th>
+                    <th class="tengah">Nama Petugas</th>
+                    <th class="tengah">Catatan</th>
+                    <th class="tengah">Bukti Foto</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach ($transaksi as $t)
+                    <tr>
+                        <td class="tengah-kolom">{{ $t->id_transaksi }}</td>
+                        <td class="tengah-kolom">{{ $t->waktu }}</td>
+                        <td class="tengah-kolom">{{ $t->id_barang }} | {{ $t->barang->nama_barang ?? 'Tidak Ditemukan' }}</td>
+                        <td class="tengah-kolom">{{ $t->tipe_transaksi }}</td>
+                        <td class="tengah-kolom">{{ $t->kuantitas }}</td>
+                        <td class="tengah-kolom">{{ $t->nama_pengirim_penerima }}</td>
+                        <td class="tengah-kolom">{{ $t->catatan }}</td>
+                        <td class="tengah-kolom">
+                            @if ($t->photo)
+                                <img src="{{ $t->photo }}" alt="Foto Bukti" style="max-width: 100px; max-height: 100px; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('{{ $t->photo }}')">
+                            @else
+                                <img src="{{ asset('images/placeholder.png') }}" alt="Tidak ada foto" style="max-width: 100px; max-height: 100px;">
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-<!-- Modal -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">Foto Bukti</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalImage" src="" alt="Foto Bukti" class="img-fluid">
+    <!-- Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Foto Bukti</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" alt="Foto Bukti" class="img-fluid">
+                </div>
             </div>
         </div>
     </div>
 </div>
-</div>
+
 <script>
     function showImageModal(imageUrl) {
         const modalImage = document.getElementById('modalImage');
@@ -173,7 +173,6 @@
             })
             .catch(error => console.error('Error:', error));
     });
-
 
     document.addEventListener('DOMContentLoaded', function () {
         const searchbox = document.getElementById('searchbox');

@@ -36,11 +36,11 @@
                     <!-- Tabel Petugas -->
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Nama</th>
-                                    <th style="width: 20%;">Aksi</th>
-                                </tr>
+                                    <th class="text-center text-wrap">Nama</th>
+                                    <th class="text-center text-wrap" style="width: 20%;">Aksi</th>
+                                </tr>                                
                             </thead>
                             <tbody id="petugasList">
                                 <!-- Data petugas akan dimuat dengan fetch -->
