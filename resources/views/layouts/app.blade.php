@@ -6,7 +6,6 @@
     <meta name="description" content="Aplikasi Pengelolaan Gudang Diskominfo Madiun">
     <meta name="author" content="Your Name">
     <title>@yield('title') - Pengelolaan Gudang</title>
-    @vite(['resources/css/tengah.css'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -266,6 +265,37 @@
             background-color: #f8f9fa;
             border-color: #ddd;
             cursor: not-allowed;
+        }
+
+        .tengah{
+            text-align: center;
+        }
+
+        .tengah-kolom{
+            text-align: center; 
+            vertical-align: middle;
+        }
+        /* Media query untuk layar kecil */
+        @media (max-width: 576px) {
+            .table th, .table td {
+                font-size: 14px; /* Kecilkan ukuran font */
+            }
+            .table th {
+                white-space: nowrap; /* Jangan bungkus teks header */
+            }
+            .table td {
+                white-space: normal; /* Biarkan isi tabel membungkus */
+            }
+        }
+
+        /* Sesuaikan margin dan padding modal untuk layar kecil */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 10px; /* Kurangi margin */
+            }
+            .modal-content {
+                padding: 10px; /* Kurangi padding */
+            }
         }
 
         /* Responsiveness */
