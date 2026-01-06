@@ -54,7 +54,7 @@ class TransaksiController extends Controller
         Log::info('Data kuantitas:', ['kuantitas' => $request->input('kuantitas')]);
         try {
             // Validasi input manual
-            $request->validate([
+            $request->validate([    
                 'proses' => 'required|in:masuk,keluar',
                 'kuantitas' => 'required|integer|min:1',
                 'nama_pengirim_penerima' => 'required|string|max:255',

@@ -3,49 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\Gudang;
+use App\Models\Gudang; // <--- PASTIKAN INI ADA
 use Illuminate\Http\Request;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\RoundBlockSizeMode;
-use Endroid\QrCode\Color\Color;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str; 
 use App\Services\QRCodeService;
-use App\Services\AuthService; // Tambahkan import AuthService
+use Illuminate\Support\Facades\Storage;
 
 class BarangController extends Controller
 {
+    private $qrCodeService;
+
+    public function __construct(QRCodeService $qrCodeService)
+    {
+        $this->qrCodeService = $qrCodeService;
+    }
+
     public function index()
     {
-        // Ambil semua data barang dari database
         $barang = Barang::all();
-        // Kirim data ke view index.blade.php
         return view('barang.index', compact('barang'));
     }
 
     public function create()
     {
         do {
-            // Generate angka acak 4 digit
             $nextId = str_pad(random_int(1, 9999), 4, '0', STR_PAD_LEFT);
-        } while (Barang::where('id_barang', $nextId)->exists()); // Periksa apakah ID sudah ada di database
+        } while (Barang::where('id_barang', $nextId)->exists()); 
     
-        // Kirim data ke view create.blade.php
         return view('barang.create', compact('nextId'));
-    }    
-
-    private $qrCodeService;
-
-    public function __construct(QRCodeService $qrCodeService)
-    {
-        $this->qrCodeService = $qrCodeService;
-        AuthService::checkLogin(); // Panggil pengecekan login
     }
 
     public function store(Request $request)
     {
+        // 1. Validasi
         $request->validate([
             'id_barang' => 'required|string|max:50|unique:barang',
             'nama_barang' => 'required|string|max:255',
@@ -55,11 +46,11 @@ class BarangController extends Controller
 
         $jenis_barang = $request->jenis_barang ?: '(kosong)';
 
-        // Simpan foto barang
+        // 2. Simpan Foto Barang
         $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
         $fotoUrl = url('storage/' . $fotoPath);
 
-        // Simpan data barang
+        // 3. Simpan Data Barang (Master Data)
         $barang = Barang::create([
             'id_barang' => $request->id_barang,
             'nama_barang' => $request->nama_barang,
@@ -68,114 +59,110 @@ class BarangController extends Controller
             'kondisi' => 'ada',
         ]);
 
-        // Generate QR Code
-        $qrCodePath = $this->qrCodeService->generateQRCode(
-            json_encode(['id_barang' => $barang->id_barang]),
-            $barang->id_barang,
-            $barang->nama_barang
+        // --- FITUR BARU: OTOMATIS DAFTAR KE GUDANG ---
+        // Saat barang dibuat, daftarkan ke gudang dengan stok 0
+        Gudang::create([
+            'id_barang' => $barang->id_barang,
+            'nama_barang' => $barang->nama_barang,
+            'jenis_barang' => $jenis_barang,
+            'stok' => 0,           // Stok awal 0
+            'lokasi_rak' => '-',   // Lokasi default
+        ]);
+        // ---------------------------------------------
+
+        // 4. Generate QR Code (Nama File Aman vs Label Cantik)
+        $namaFileAman = Str::limit(Str::slug($barang->nama_barang), 50, '') . '-' . $barang->id_barang . '.png';
+        $labelGambar = $barang->nama_barang;
+
+        $relativePath = $this->qrCodeService->generateQRCode(
+            json_encode(['id_barang' => $barang->id_barang]), 
+            $namaFileAman, 
+            $labelGambar   
         );
 
-        // Simpan path QR Code ke database
+        // 5. Update Database Barang dengan path QR
         $barang->update([
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $barang->nama_barang,
                 'jenis_barang' => $jenis_barang,
             ]),
-            'qr_code_path' => $qrCodePath,
+            'qr_code_path' => $relativePath,
         ]);
+
+        $publicQrUrl = url('storage/' . $relativePath);
 
         session([
             'last_generated_id' => $barang->id_barang,
-            'qr_code_url' => $qrCodePath,
+            'qr_code_url' => $publicQrUrl,
         ]);
 
         return redirect()
             ->route('barang.create')
-            ->with('success', 'Barang berhasil ditambahkan.')
-            ->with('qr_code_url', $qrCodePath);
-    }
-
-    public function getBarang($id_barang)
-    {
-        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
-
-        // Jika data tidak ditemukan, kembalikan pesan error
-        if (!$barang) {
-            return response()->json(['error' => 'Data barang tidak ditemukan atau telah dihapus'], 404);
-        }
-
-        // Kembalikan data barang dalam format JSON
-        return response()->json($barang);
+            ->with('success', 'Barang berhasil ditambahkan dan terdaftar di Gudang (Stok 0).')
+            ->with('qr_code_url', $publicQrUrl);
     }
 
     public function downloadQRCode($id_barang)
     {
         $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-        $filePath = storage_path("app/public/barang_qr_codes/{$id_barang}.png");
 
-        Log::info("Checking file path: {$filePath}");
+        if (empty($barang->qr_code_path)) {
+            return back()->with('error', 'Data QR Code belum digenerate.');
+        }
+
+        $filePath = storage_path("app/public/" . $barang->qr_code_path);
 
         if (!file_exists($filePath)) {
-            Log::error("File not found: {$filePath}");
-            return redirect()->back()->with('error', 'File QR Code tidak ditemukan.');
+            Log::error("File QR tidak ditemukan di: {$filePath}");
+            return back()->with('error', 'File fisik QR Code tidak ditemukan di server.');
         }
 
-        Log::info("File found, proceeding to download: {$filePath}");
+        $downloadName = Str::slug($barang->nama_barang) . '-' . $barang->id_barang . '.png';
 
-        return response()->download($filePath, "{$id_barang}_qrcode.png")->deleteFileAfterSend(false);
+        return response()->download($filePath, $downloadName);
     }
 
+    public function getBarang($id_barang)
+    {
+        $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->first();
+        if (!$barang) return response()->json(['error' => 'Data barang tidak ditemukan'], 404);
+        return response()->json($barang);
+    }
+    
     public function scan(Request $request)
     {
-        // Ambil data JSON dari barcode yang di-scan
-        $jsonData = $request->input('barcode_data'); // Data JSON dari scanner
-
-        // Cari data barang berdasarkan kode_qr di database
+        $jsonData = $request->input('barcode_data'); 
         $barang = Barang::where('kode_qr', $jsonData)->first();
-
-        if (!$barang) {
-            return abort(404, 'Barang tidak ditemukan.');
-        }
-
-        // Decode data JSON dari kolom kode_qr
+        if (!$barang) return abort(404, 'Barang tidak ditemukan.');
         $decodedData = json_decode($barang->kode_qr, true);
-
-        // Kirim data ke view untuk ditampilkan
         return view('barcode-scan-result', compact('decodedData'));
     }
 
     public function show($id_barang)
     {
-        // Ambil data barang berdasarkan ID
         $barang = Barang::where('id_barang', $id_barang)->where('kondisi', 'ada')->firstOrFail();
-
-        // Kirim data barang ke view
         return view('barang-detail', compact('barang'));
     }
+    
     public function update(Request $request, $id_barang)
     {
-        // Validasi input
         $request->validate([
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'required|string|max:255',
         ]);
-
-        // Cari data barang
         $barang = Barang::findOrFail($id_barang);
-
-        // Update data barang
         $barang->update([
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
         ]);
-
-        // Perbarui juga data di tabel gudang jika barang terkait ada di sana
+        
+        // Update juga nama di Gudang agar sinkron
         Gudang::where('id_barang', $id_barang)->update([
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
         ]);
-
+        
         return redirect()->route('barang.index')->with('success', 'Data barang berhasil diperbarui.');
     }
 }
