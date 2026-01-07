@@ -12,9 +12,8 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <!-- Filter Section -->
     <div class="row mb-4">
-        <div class="col-md-4    ">
+        <div class="col-md-4">
             <label for="filterTanggalMulai">Rentang Waktu</label>
             <div class="d-flex">
                 <input 
@@ -22,6 +21,7 @@
                     id="filterTanggalMulai" 
                     class="form-control" 
                     placeholder="Mulai"
+                    value="{{ $tanggalPertama }}"
                     min="{{ $tanggalPertama }}" 
                     max="{{ $tanggalTerakhir }}">
                 <input 
@@ -29,6 +29,7 @@
                     id="filterTanggalAkhir" 
                     class="form-control" 
                     placeholder="Akhir"
+                    value="{{ $tanggalTerakhir }}"
                     min="{{ $tanggalPertama }}" 
                     max="{{ $tanggalTerakhir }}">
             </div>
@@ -51,12 +52,11 @@
         </div>    
     </div>
     
-    <!-- Table Section -->
     <div class="table-responsive">
         <table class="table table-bordered" id="transaksiTable">
             <thead>
                 <tr>
-                    <th class="tengah">ID</th>
+                    <th class="d-none">ID</th> 
                     <th class="tengah">Waktu</th>
                     <th class="tengah">Id Barang | Nama Barang</th>
                     <th class="tengah">Jenis Transaksi</th>
@@ -69,8 +69,8 @@
             <tbody>
                 @foreach ($transaksi as $t)
                     <tr>
-                        <td class="tengah-kolom">{{ $t->id_transaksi }}</td>
-                        <td class="tengah-kolom">{{ $t->waktu }}</td>
+                        <td class="d-none">{{ $t->id_transaksi }}</td>
+                        <td class="tengah-kolom">{{ date('Y-m-d H:i:s', strtotime($t->waktu)) }}</td>
                         <td class="tengah-kolom">{{ $t->id_barang }} | {{ $t->barang->nama_barang ?? 'Tidak Ditemukan' }}</td>
                         <td class="tengah-kolom">{{ $t->tipe_transaksi }}</td>
                         <td class="tengah-kolom">{{ $t->kuantitas }}</td>
@@ -78,8 +78,13 @@
                         <td class="tengah-kolom">{{ $t->catatan }}</td>
                         <td class="tengah-kolom">
                             @if ($t->photo)
-                                <img src="{{ $t->photo }}" alt="Foto Bukti" style="max-width: 100px; max-height: 100px; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('{{ $t->photo }}')">
+                                {{-- PERBAIKAN LOGIKA GAMBAR DISINI --}}
+                                @php
+                                    // Cek apakah ini path baru (relative) atau URL lama
+                                    $imgSrc = \Illuminate\Support\Str::startsWith($t->photo, 'http') ? $t->photo : asset('storage/' . $t->photo);
+                                @endphp
+                                <img src="{{ $imgSrc }}" alt="Foto Bukti" style="max-width: 100px; max-height: 100px; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageModal('{{ $imgSrc }}')">
                             @else
                                 <img src="{{ asset('images/placeholder.png') }}" alt="Tidak ada foto" style="max-width: 100px; max-height: 100px;">
                             @endif
@@ -90,7 +95,6 @@
         </table>
     </div>
 
-    <!-- Modal -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -106,10 +110,10 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
     function showImageModal(imageUrl) {
-        const modalImage = document.getElementById('modalImage');
-        modalImage.src = imageUrl;
+        document.getElementById('modalImage').src = imageUrl;
     }
 
     document.getElementById('exportExcel').addEventListener('click', function () {
@@ -117,38 +121,38 @@
         const filteredData = [];
         let filterApplied = false;
 
-        // Cek apakah ada filter yang diterapkan
+        // Cek input filter
         const searchValue = document.getElementById('searchbox').value.trim();
         const jenisValue = document.getElementById('filterJenisTransaksi').value.trim();
         const namaValue = document.getElementById('filterNamaPengirim').value.trim();
         const tanggalMulai = document.getElementById('filterTanggalMulai').value.trim();
         const tanggalAkhir = document.getElementById('filterTanggalAkhir').value.trim();
 
-        // Jika salah satu filter diisi, tandai filterApplied sebagai true
         if (searchValue || jenisValue || namaValue || tanggalMulai || tanggalAkhir) {
             filterApplied = true;
         }
 
-        // Ambil data yang terlihat (hanya jika ada filter)
+        // Logic pengambilan data (sesuai index kolom tabel yang baru)
+        // Index: 0=HiddenID, 1=Waktu, 2=Barang, 3=Jenis, 4=Jml, 5=Petugas, 6=Catatan, 7=Foto
         if (filterApplied) {
             rows.forEach(row => {
                 if (row.style.display !== 'none') {
                     filteredData.push({
-                        id_transaksi: row.cells[0].textContent.trim(), // ID Transaksi
-                        id_barang: row.cells[2].textContent.split('|')[0].trim(), // ID Barang (split dari "ID Barang | Nama Barang")
-                        nama_barang: row.cells[2].textContent.split('|')[1].trim(), // Nama Barang (split dari "ID Barang | Nama Barang")
-                        tipe_transaksi: row.cells[3].textContent.trim(), // Jenis Transaksi
-                        kuantitas: row.cells[4].textContent.trim(), // Kuantitas
-                        nama_pengirim_penerima: row.cells[5].textContent.trim(), // Nama Pengirim/Penerima
-                        waktu: row.cells[1].textContent.trim(), // Waktu
-                        catatan: row.cells[6].textContent.trim(), // Catatan
-                        photo: row.cells[7].querySelector('img')?.src || '', // Foto Bukti
+                        id_transaksi: row.cells[0].textContent.trim(),
+                        waktu: row.cells[1].textContent.trim(),
+                        id_barang: row.cells[2].textContent.split('|')[0].trim(),
+                        nama_barang: row.cells[2].textContent.split('|')[1]?.trim() || '',
+                        tipe_transaksi: row.cells[3].textContent.trim(),
+                        kuantitas: row.cells[4].textContent.trim(),
+                        nama_pengirim_penerima: row.cells[5].textContent.trim(),
+                        catatan: row.cells[6].textContent.trim(),
+                        photo: row.cells[7].querySelector('img')?.src || 'Tidak Ada Foto'
                     });
                 }
             });
         }
 
-        // Kirimkan data filter ke server
+        // Kirim ke server
         fetch('{{ route('transaksi.export') }}', {
             method: 'POST',
             headers: {
@@ -156,24 +160,25 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
             },
             body: JSON.stringify({
-                filteredData: filterApplied ? filteredData : [], // Kirim data kosong jika tidak ada filter
+                filteredData: filterApplied ? filteredData : [],
             }),
         })
-            .then(response => {
-                if (!response.ok) throw new Error('Gagal mengekspor data.');
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'transaksi.xlsx';
-                a.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => console.error('Error:', error));
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal mengekspor data.');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transaksi.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => console.error('Error:', error));
     });
 
+    // Logic Filter Tabel Client-Side
     document.addEventListener('DOMContentLoaded', function () {
         const searchbox = document.getElementById('searchbox');
         const filterJenisTransaksi = document.getElementById('filterJenisTransaksi');
@@ -185,14 +190,21 @@
 
         function filterTable() {
             const searchValue = searchbox.value.toLowerCase();
-            const jenisValue = filterJenisTransaksi.value;
+            const jenisValue = filterJenisTransaksi.value.toLowerCase(); // Penting: lowercase agar cocok
             const namaValue = filterNamaPengirim.value.toLowerCase();
-            const tanggalMulai = new Date(filterTanggalMulai.value);
-            const tanggalAkhir = new Date(filterTanggalAkhir.value);
+            
+            // Konversi tanggal (set jam ke 00:00:00 agar perbandingan akurat)
+            const tanggalMulai = filterTanggalMulai.value ? new Date(filterTanggalMulai.value) : null;
+            if(tanggalMulai) tanggalMulai.setHours(0,0,0,0);
+
+            const tanggalAkhir = filterTanggalAkhir.value ? new Date(filterTanggalAkhir.value) : null;
+            if(tanggalAkhir) tanggalAkhir.setHours(23,59,59,999);
 
             rows.forEach(row => {
                 const idTransaksi = row.cells[0].textContent.toLowerCase();
-                const waktu = new Date(row.cells[1].textContent);
+                const waktuText = row.cells[1].textContent; 
+                const waktu = new Date(waktuText); // Javascript auto parse YYYY-MM-DD HH:MM:SS
+
                 const idBarangNamaBarang = row.cells[2].textContent.toLowerCase();
                 const jenisTransaksi = row.cells[3].textContent.toLowerCase();
                 const kuantitas = row.cells[4].textContent.toLowerCase();
@@ -201,32 +213,26 @@
 
                 let showRow = true;
 
-                // Filter berdasarkan searchbox
-                if (
-                    searchValue &&
-                    !idTransaksi.includes(searchValue) &&
-                    !idBarangNamaBarang.includes(searchValue) &&
-                    !kuantitas.includes(searchValue) &&
-                    !catatan.includes(searchValue)
-                ) {
+                if (searchValue && 
+                    !idTransaksi.includes(searchValue) && 
+                    !idBarangNamaBarang.includes(searchValue) && 
+                    !kuantitas.includes(searchValue) && 
+                    !catatan.includes(searchValue)) {
                     showRow = false;
                 }
 
-                // Filter berdasarkan jenis transaksi
                 if (jenisValue && jenisTransaksi !== jenisValue) {
                     showRow = false;
                 }
 
-                // Filter berdasarkan nama pengirim/penerima
                 if (namaValue && !namaPengirim.includes(namaValue)) {
                     showRow = false;
                 }
 
-                // Filter berdasarkan rentang waktu
-                if (filterTanggalMulai.value && waktu < tanggalMulai) {
+                if (tanggalMulai && waktu < tanggalMulai) {
                     showRow = false;
                 }
-                if (filterTanggalAkhir.value && waktu > tanggalAkhir) {
+                if (tanggalAkhir && waktu > tanggalAkhir) {
                     showRow = false;
                 }
 
@@ -241,4 +247,5 @@
         filterTanggalAkhir.addEventListener('change', filterTable);
     });
 </script>
+@endpush
 @endsection

@@ -4,7 +4,6 @@
 
 @section('content')
 <div id="main-content" class="container d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 230px);">
-    <!-- Card with buttons -->
     <div id="button-card" class="card shadow-lg p-4" style="background-color: #f8f9fa; border-radius: 12px; width: 650px;">
         <h1 class="mb-4 text-primary text-center">Pilih Aksi</h1>
         <div class="d-grid gap-4">
@@ -23,9 +22,7 @@
         </div>
     </div>
 
-    <!-- Scanner Container -->
     <div id="scanner-container" class="d-none text-center">
-        <!-- Kamera live atau hasil gambar akan ditampilkan di sini -->
         <div id="camera-container">
             <video id="qr-video" autoplay playsinline style="width: 100%; max-width: 600px; border: 2px solid #ccc; border-radius: 12px;"></video>
             <canvas id="photo-canvas" style="display: none;"></canvas>
@@ -199,6 +196,14 @@
         const blob = dataURLtoBlob(photoDataUrl);
         formData.append('qr_image', blob, 'qr-code.png');
 
+        // Tampilkan loading agar user tahu proses sedang berjalan
+        Swal.fire({
+            title: 'Memproses...',
+            text: 'Sedang membaca QR Code',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading() }
+        });
+
         fetch('{{ route('proses.scan') }}', {
             method: 'POST',
             headers: {
@@ -225,7 +230,8 @@
                         title: 'Gagal',
                         text: data.message,
                     });
-                    resetScanner(); // Reset elemen setelah scan gagal
+                    // Reset scanner agar bisa coba lagi
+                    resetScanner(); 
                 }
             })
             .catch((error) => {
@@ -274,35 +280,9 @@
         uploadFileInput.disabled = false;
     }
 
-
     function stopQrScanner() {
-        // Berhenti streaming kamera jika sedang aktif
-        if (videoStream) {
-            videoStream.getTracks().forEach((track) => track.stop());
-            videoStream = null;
-        }
-        videoElement.srcObject = null;
-
-        // Reset unggahan file
-        uploadFileInput.value = ""; // Kosongkan input file
-
-        // Kembalikan ke tampilan awal
-        buttonCard.classList.remove('d-none');
-        scannerContainer.classList.add('d-none');
-        videoElement.style.display = 'block';
-        canvasElement.style.display = 'none';
-        processButtonContainer.classList.add('d-none');
-        photoTaken = false;
-        takePhotoButton.disabled = false;
-        uploadFileInput.disabled = false;
-
-        Swal.fire({
-            icon: 'info',
-            title: 'Reset',
-            text: 'Semua input telah direset.',
-            timer: 1500,
-            showConfirmButton: false,
-        });
+        // Sama dengan resetScanner
+        resetScanner();
     }
 </script>
 @endpush

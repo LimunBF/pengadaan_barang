@@ -5,187 +5,129 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Gudang;
 use App\Models\Transaksi;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Exports\TransaksiExport;
-use App\Services\AuthService; // Tambahkan import AuthService
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
+use App\Services\AuthService;
 
 class TransaksiController extends Controller
 {
     public function __construct()
     {
-        AuthService::checkLogin(); // Panggil pengecekan login
+        AuthService::checkLogin();
     }
 
+    // Menampilkan Halaman Riwayat (Tabel)
     public function index()
     {
-        $transaksi = Transaksi::all();
-        $transaksi = Transaksi::with('barang')->get();
-        $tanggalPertama = Transaksi::orderBy('waktu', 'asc')->value('waktu');
-        $tanggalTerakhir = Transaksi::orderBy('waktu', 'desc')->value('waktu');
-
-        // Format tanggal menjadi YYYY-MM-DD
-        $tanggalPertama = $tanggalPertama ? date('Y-m-d', strtotime($tanggalPertama)) : null;
-        $tanggalTerakhir = $tanggalTerakhir ? date('Y-m-d', strtotime($tanggalTerakhir)) : null;
+        $transaksi = Transaksi::with('barang')->orderBy('waktu', 'desc')->get();
+        
+        $tanggalPertama = Transaksi::min('waktu') ? date('Y-m-d', strtotime(Transaksi::min('waktu'))) : date('Y-m-d');
+        $tanggalTerakhir = Transaksi::max('waktu') ? date('Y-m-d', strtotime(Transaksi::max('waktu'))) : date('Y-m-d');
 
         return view('transaksi.index', compact('transaksi', 'tanggalPertama', 'tanggalTerakhir'));
     }
 
-    public function masuk()
-    {
-        $transaksi = Transaksi::where('tipe_transaksi', 'masuk')->get();
-        return view('transaksi.masuk', compact('transaksi'));
-    }
-
-    public function keluar()
-    {
-        $transaksi = Transaksi::where('tipe_transaksi', 'keluar')->get();
-        return view('transaksi.keluar', compact('transaksi'));
-    }
-
+    // OTAK PEMINJAMAN (Menangani Form Dashboard)
     public function store(Request $request)
     {
-        Log::info('Data yang diterima di request:', $request->all()); // Debug data input
-        Log::info('Data yang diterima:', $request->all());
-        Log::info('Data kuantitas:', ['kuantitas' => $request->input('kuantitas')]);
         try {
-            // Validasi input manual
-            $request->validate([    
+            $request->validate([
                 'proses' => 'required|in:masuk,keluar',
                 'kuantitas' => 'required|integer|min:1',
                 'nama_pengirim_penerima' => 'required|string|max:255',
                 'catatan' => 'nullable|string',
-                'image_data' => 'nullable|string', // Validasi untuk foto
+                'image_data' => 'nullable|string', // Ini string Base64 dari kamera dashboard
             ]);
 
-            // Ambil data barang dari session
-            $barang = session('barang');
-            if (!$barang) {
-                return redirect()->back()->with('error', 'Data barang tidak ditemukan di session.');
+            // Ambil barang dari session
+            $barangSession = session('barang');
+            if (!$barangSession || !isset($barangSession['id_barang'])) {
+                return redirect()->route('dashboard')->with('error', 'Sesi barang habis. Silakan scan ulang.');
             }
+            $id_barang = $barangSession['id_barang'];
 
-            // Pastikan session barang memiliki semua data yang diperlukan
-            if (!isset($barang['id_barang'], $barang['nama_barang'], $barang['jenis_barang'])) {
-                return redirect()->back()->with('error', 'Data barang di session tidak lengkap.');
-            }
-
-            // Data dari session
-            $id_barang = $barang['id_barang'];
-            $nama_barang = $barang['nama_barang'];
-            $jenis_barang = $barang['jenis_barang'];
-
-            // Data dari form
-            $proses = $request->input('proses');
-            $kuantitas = $request->input('kuantitas');
-            $lokasi_rak = $request->input('lokasi_rak');
-            $nama_pengirim_penerima = strtoupper($request->input('nama_pengirim_penerima'));
-            $catatan = $request->input('catatan');
-            $imageData = $request->input('image_data');
-
-            // Proses penyimpanan gambar (jika ada)
-            $photoUrl = null;
-            if ($imageData) {
-                // Buat format tanggal dan waktu
-                $currentDateTime = now()->format('d-m-Y(H_i_s)');
-                $fileName = 'transaksi_' . $currentDateTime . '.png';
-
-                // Decode base64 gambar
-                $image = str_replace('data:image/png;base64,', '', $imageData);
+            // 1. LOGIKA SIMPAN GAMBAR (Base64 -> File Storage)
+            $relativePath = null;
+            if ($request->filled('image_data')) {
+                // Ambil string base64
+                $image = $request->input('image_data');
+                // Bersihkan header data:image...
+                $image = str_replace('data:image/png;base64,', '', $image);
                 $image = str_replace(' ', '+', $image);
-                $image = base64_decode($image);
+                // Decode jadi binary
+                $imageData = base64_decode($image);
 
-                // Path penyimpanan di storage/app/public/foto_bukti
-                $directoryPath = storage_path('app/public/foto_bukti');
-                if (!file_exists($directoryPath)) {
-                    mkdir($directoryPath, 0777, true); // Buat folder jika belum ada
-                }
-
-                $filePath = $directoryPath . '/' . $fileName;
-                file_put_contents($filePath, $image);
-
-                // URL publik file (path ke public/storage)
-                $photoUrl = url('storage/foto_bukti/' . $fileName);
+                // Buat nama file unik
+                $fileName = 'transaksi_' . time() . '_' . Str::random(5) . '.png';
+                
+                // Simpan ke folder public/bukti_transaksi menggunakan Storage Facade
+                Storage::disk('public')->put('bukti_transaksi/' . $fileName, $imageData);
+                
+                // Simpan path relatif ke database
+                $relativePath = 'bukti_transaksi/' . $fileName;
             }
 
-
-            // Proses transaksi
+            // 2. LOGIKA STOK GUDANG
             $gudang = Gudang::where('id_barang', $id_barang)->first();
-            if ($proses === 'masuk') {
-                if ($gudang) {
-                    $gudang->stok += $kuantitas;
-                    $gudang->save();
-                } else {
-                    Gudang::create([
-                        'id_barang' => $id_barang,
-                        'nama_barang' => $nama_barang,
-                        'jenis_barang' => $jenis_barang,
-                        'lokasi_rak' => $lokasi_rak,
-                        'stok' => $kuantitas,
-                    ]);
-                }
-            } elseif ($proses === 'keluar') {
-                if ($gudang) {
-                    if ($gudang->stok < $kuantitas) {
-                        return redirect()->back()->with('error', 'Stok barang tidak mencukupi.');
-                    }
-                    $gudang->stok -= $kuantitas;
-                    $gudang->save();
-                } else {
-                    return redirect()->back()->with('error', 'Barang tidak ditemukan di gudang.');
-                }
-            }
-
-            // Simpan transaksi
-            Transaksi::create([
-                'id_barang' => $id_barang,
-                'tipe_transaksi' => $proses,
-                'kuantitas' => $kuantitas,
-                'nama_pengirim_penerima' => $nama_pengirim_penerima,
-                'waktu' => now(),
-                'catatan' => $catatan,
-                'photo' => $photoUrl,
-            ]);
-
-            return redirect()->back()->with('success', 'Transaksi berhasil dicatat!');
-        } catch (\Exception $e) {
-            Log::error('Error pada transaksi store: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan transaksi.');
-        }
-    }
-    public function export(Request $request)
-    {
-        try {
-            // Ambil semua data transaksi
-            $allData = Transaksi::with('barang')->get();
-
-            // Ambil data terfilter dari request
-            $filteredData = collect($request->input('filteredData', []));
-
-            // Jika filteredData kosong, tambahkan pesan "Filter Tidak Digunakan"
-            if ($filteredData->isEmpty()) {
-                $filteredData = collect([
-                    [
-                        'id_transaksi' => '',
-                        'id_barang' => '',
-                        'nama_barang' => '',
-                        'jenis_transaksi' => '',
-                        'kuantitas' => '',
-                        'nama_pengirim_penerima' => '',
-                        'waktu' => '',
-                        'catatan' => '',
-                        'photo' => 'Filter Tidak Digunakan',
-                    ],
+            
+            // Auto create jika belum ada (jaga-jaga)
+            if (!$gudang) {
+                $gudang = Gudang::create([
+                    'id_barang' => $id_barang,
+                    'nama_barang' => $barangSession['nama_barang'],
+                    'jenis_barang' => $barangSession['jenis_barang'],
+                    'stok' => 0,
+                    'lokasi_rak' => $request->lokasi_rak ?? '-'
                 ]);
             }
 
-            // Generate file Excel
+            if ($request->proses === 'masuk') {
+                $gudang->increment('stok', $request->kuantitas);
+                if ($request->filled('lokasi_rak')) {
+                    $gudang->update(['lokasi_rak' => $request->lokasi_rak]);
+                }
+            } else {
+                // Cek Stok
+                if ($gudang->stok < $request->kuantitas) {
+                    return redirect()->back()->with('error', 'Stok tidak mencukupi. Sisa: ' . $gudang->stok);
+                }
+                $gudang->decrement('stok', $request->kuantitas);
+            }
+
+            // 3. SIMPAN RIWAYAT TRANSAKSI
+            Transaksi::create([
+                'id_barang' => $id_barang,
+                'tipe_transaksi' => $request->proses,
+                'kuantitas' => $request->kuantitas,
+                'nama_pengirim_penerima' => strtoupper($request->nama_pengirim_penerima),
+                'waktu' => now(),
+                'catatan' => $request->catatan,
+                'photo' => $relativePath, // Path yang disimpan bersih (bukti_transaksi/file.png)
+            ]);
+
+            // Hapus session agar dashboard kembali ke mode scan
+            session()->forget('barang');
+
+            return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            Log::error('Error Transaksi: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem.');
+        }
+    }
+
+    public function export(Request $request)
+    {
+        try {
+            $allData = Transaksi::with('barang')->orderBy('waktu', 'desc')->get();
+            $filteredData = collect($request->input('filteredData', []));
+
             return Excel::download(new TransaksiExport($allData, $filteredData), 'transaksi.xlsx');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengekspor data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal ekspor: ' . $e->getMessage());
         }
     }
 }

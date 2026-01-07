@@ -7,9 +7,6 @@
 
 <a href="#" id="exportGudangExcel" class="btn btn-success mb-5">Export ke Excel</a>
 
-
-
-<!-- SweetAlert Notifikasi -->
 @if (session('success'))
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -24,32 +21,29 @@
 </script>
 @endif
 
-    <div class="container-fluid mb-3">
-        <div class="row g-3">
-            <!-- Searchbox -->
-            <div class="col-lg-4 col-md-6">
-                <label for="searchBox" class="form-label">Cari Nama Barang:</label>
-                <input type="text" id="searchBox" class="form-control" placeholder="Ketik nama barang...">
-            </div>
+<div class="container-fluid mb-3">
+    <div class="row g-3">
+        <div class="col-lg-4 col-md-6">
+            <label for="searchBox" class="form-label">Cari Nama Barang:</label>
+            <input type="text" id="searchBox" class="form-control" placeholder="Ketik nama barang...">
+        </div>
 
-            <!-- Filter Range Stok -->
-            <div class="col-lg-4 col-md-6">
-                <label for="stokRange" class="form-label">Filter Stok:</label>
-                <div class="d-flex">
-                    <input type="number" id="stokMin" class="form-control me-2" placeholder="Min">
-                    <input type="number" id="stokMax" class="form-control" placeholder="Max">
-                </div>
-            </div>
-
-            <!-- Filter Lokasi Rak -->
-            <div class="col-lg-4 col-md-12">
-                <label for="lokasiRakFilter" class="form-label">Filter Lokasi Rak:</label>
-                <select id="lokasiRakFilter" class="form-control">
-                    <option value="">Semua Rak</option>
-                </select>
+        <div class="col-lg-4 col-md-6">
+            <label for="stokRange" class="form-label">Filter Stok:</label>
+            <div class="d-flex">
+                <input type="number" id="stokMin" class="form-control me-2" placeholder="Min">
+                <input type="number" id="stokMax" class="form-control" placeholder="Max">
             </div>
         </div>
+
+        <div class="col-lg-4 col-md-12">
+            <label for="lokasiRakFilter" class="form-label">Filter Lokasi Rak:</label>
+            <select id="lokasiRakFilter" class="form-control">
+                <option value="">Semua Rak</option>
+            </select>
+        </div>
     </div>
+</div>
     
 <div class="table-responsive">
     <table class="table table-bordered table-striped">
@@ -68,30 +62,35 @@
         <tbody>
             @forelse ($gudangs as $barang)
             <tr>
-                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['id_barang'] }}">{{ $barang['id_barang'] }}</td>
-                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['nama_barang'] }}">{{ Str::limit($barang['nama_barang'], 20) }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang->id_barang }}">{{ $barang->id_barang }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang->nama_barang }}">{{ Str::limit($barang->nama_barang, 20) }}</td>
                 <td class="tengah-kolom">
-                    <span data-bs-toggle="tooltip" title="{{ $barang['jenis_barang'] }}">
-                        {{ Str::limit($barang['jenis_barang'], 15) }}
+                    <span data-bs-toggle="tooltip" title="{{ $barang->jenis_barang }}">
+                        {{ Str::limit($barang->jenis_barang, 15) }}
                     </span>
                 </td>
+                
                 <td class="tengah">
                     @if ($barang->barang && $barang->barang->foto_barang)
-                    <img src="{{ $barang->barang->foto_barang }}" 
+                    <img src="{{ asset('storage/' . $barang->barang->foto_barang) }}?{{ time() }}"
                         alt="Foto {{ $barang->nama_barang }}" 
                         style="width: 100px; height: auto; cursor: pointer;" 
-                        onclick="openImageModal('{{ $barang->barang->foto_barang }}')">
+                        onclick="openImageModal('{{ asset('storage/' . $barang->barang->foto_barang) }}?{{ time() }}')">
                     @else
                     <span>Tidak ada foto</span>
                     @endif
                 </td>                
-                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['lokasi_rak'] }}">{{ Str::limit($barang['lokasi_rak'], 15) }}</td>
-                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['stok'] }}">{{ $barang['stok'] }}</td>
-                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang['satuan'] }}">{{ $barang['satuan'] }}</td>
+                
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang->lokasi_rak }}">{{ Str::limit($barang->lokasi_rak, 15) }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang->stok }}">{{ $barang->stok }}</td>
+                <td class="tengah-kolom" data-bs-toggle="tooltip" title="{{ $barang->satuan }}">{{ $barang->satuan }}</td>
+                
                 <td class="tengah-kolom">
-                    <button class="btn btn-sm btn-primary" onclick="openEditModal({{ $barang['id_barang'] }}, '{{ $barang['nama_barang'] }}', '{{ $barang['lokasi_rak'] }}', {{ $barang['stok'] }}, '{{ $barang['satuan'] }}')" title="Edit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
+                <button class="btn btn-sm btn-primary" 
+                    onclick="openEditModal('{{ $barang->id_barang }}', '{{ $barang->nama_barang }}', '{{ $barang->lokasi_rak }}', {{ $barang->stok }}, '{{ $barang->satuan }}')" 
+                    title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
                 </td>
             </tr>
             @empty
@@ -101,13 +100,11 @@
             @endforelse
         </tbody>
     </table>
-    <!-- Pagination -->
     <div class="d-flex justify-content-center mt-4">
         {{ $gudangs->links('pagination::bootstrap-5') }}
     </div>
 </div>
 
-<!-- Modal untuk Edit -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -119,9 +116,10 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
-                    <!-- Tampilkan Nama Barang -->
                     <p class="mb-3"><strong>Nama Barang:</strong> <span id="nama_barang_display"></span></p>
+                    
                     <input type="hidden" name="id_barang" id="id_barang">
+                    
                     <div class="mb-3">
                         <label for="lokasi_rak" class="form-label">Lokasi Rak</label>
                         <input type="text" class="form-control" id="lokasi_rak" name="lokasi_rak" required>
@@ -144,7 +142,6 @@
     </div>
 </div>
 
-<!-- Modal untuk memperbesar gambar -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered ">
         <div class="modal-content modal-lg">
@@ -153,7 +150,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <!-- Gambar akan diisi dengan JavaScript -->
                 <img id="imageModalContent" src="" class="img-fluid" alt="Foto Barang">
             </div>
         </div>
@@ -163,35 +159,29 @@
 
 @push('scripts')
 <script>
-    // Variabel untuk menyimpan instansi modal
     let modalInstance;
 
-    /**
-     * Membuka modal dengan data yang telah diisi
-     * @param {int} id_barang
-     * @param {string} nama_barang
-     * @param {string} lokasi_rak
-     * @param {int} stok
-     * @param {string} satuan
-     */
+    // Fungsi Open Edit Modal
     function openEditModal(id_barang, nama_barang, lokasi_rak, stok, satuan) {
-        // Reset dan buka modal
         if (modalInstance) {
             modalInstance.hide();
         }
 
-        // Set data ke dalam modal
+        // Isi data ke Form
         document.getElementById('id_barang').value = id_barang;
         document.getElementById('nama_barang_display').textContent = nama_barang;
         document.getElementById('lokasi_rak').value = lokasi_rak;
         document.getElementById('stok').value = stok;
         document.getElementById('satuan').value = satuan;
-        document.getElementById('editForm').action = `/gudang/edit/${id_barang}`;
+
+        // Set URL Action untuk Update (Route: /gudang/{id})
+        document.getElementById('editForm').action = `/gudang/${id_barang}`;
         
         modalInstance = new bootstrap.Modal(document.getElementById('editModal'));
         modalInstance.show();
     }
 
+    // Tooltip Init
     document.addEventListener('DOMContentLoaded', function () {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -199,19 +189,14 @@
         })
     });
 
-        /**
-     * Membuka modal untuk menampilkan gambar besar
-     * @param {string} imageUrl - URL gambar
-     */
+    // Fungsi Open Image Modal
     function openImageModal(imageUrl) {
-        // Set gambar ke dalam modal
         document.getElementById('imageModalContent').src = imageUrl;
-
-        // Tampilkan modal
         const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
         imageModal.show();
     }
 
+    // Script Filter Tabel (Javascript Murni)
     document.addEventListener('DOMContentLoaded', function () {
         const searchBox = document.getElementById('searchBox');
         const stokMin = document.getElementById('stokMin');
@@ -219,16 +204,23 @@
         const lokasiRakFilter = document.getElementById('lokasiRakFilter');
         const tableRows = document.querySelectorAll('tbody tr');
 
-        // Populasi pilihan lokasi rak
-        const lokasiRakOptions = new Set([...tableRows].map(row => row.querySelector('td:nth-child(5)').textContent.trim()));
+        // Populasi Dropdown Lokasi Rak
+        const lokasiRakOptions = new Set();
+        tableRows.forEach(row => {
+            // Cek apakah row bukan "Tidak ada data"
+            const cell = row.querySelector('td:nth-child(5)');
+            if(cell) lokasiRakOptions.add(cell.textContent.trim());
+        });
+        
         lokasiRakOptions.forEach(option => {
-            const newOption = document.createElement('option');
-            newOption.value = option;
-            newOption.textContent = option;
-            lokasiRakFilter.appendChild(newOption);
+            if(option) {
+                const newOption = document.createElement('option');
+                newOption.value = option;
+                newOption.textContent = option;
+                lokasiRakFilter.appendChild(newOption);
+            }
         });
 
-        // Fungsi untuk filter tabel
         function filterTable() {
             const searchValue = searchBox.value.toLowerCase();
             const minStok = stokMin.value ? parseInt(stokMin.value) : null;
@@ -236,63 +228,41 @@
             const selectedRak = lokasiRakFilter.value;
 
             tableRows.forEach(row => {
+                // Skip jika baris "tidak ada data"
+                if(row.cells.length < 2) return;
+
                 const namaBarang = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 const stok = parseInt(row.querySelector('td:nth-child(6)').textContent);
                 const lokasiRak = row.querySelector('td:nth-child(5)').textContent;
 
                 let isMatch = true;
 
-                // Filter Nama Barang
-                if (searchValue && !namaBarang.includes(searchValue)) {
-                    isMatch = false;
-                }
+                if (searchValue && !namaBarang.includes(searchValue)) isMatch = false;
+                if (minStok !== null && stok < minStok) isMatch = false;
+                if (maxStok !== null && stok > maxStok) isMatch = false;
+                if (selectedRak && lokasiRak !== selectedRak) isMatch = false;
 
-                // Filter Range Stok
-                if (minStok !== null && stok < minStok) {
-                    isMatch = false;
-                }
-                if (maxStok !== null && stok > maxStok) {
-                    isMatch = false;
-                }
-
-                // Filter Lokasi Rak
-                if (selectedRak && lokasiRak !== selectedRak) {
-                    isMatch = false;
-                }
-
-                // Tampilkan atau sembunyikan baris
                 row.style.display = isMatch ? '' : 'none';
             });
         }
 
-        // Event listeners
         searchBox.addEventListener('input', filterTable);
         stokMin.addEventListener('input', filterTable);
         stokMax.addEventListener('input', filterTable);
         lokasiRakFilter.addEventListener('change', filterTable);
     });
 
-    //export excel
+    // Export Excel Script
     document.getElementById('exportGudangExcel').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    const searchValue = document.getElementById('searchBox').value;
-    const stokMin = document.getElementById('stokMin').value;
-    const stokMax = document.getElementById('stokMax').value;
-    const lokasiRak = document.getElementById('lokasiRakFilter').value;
-
-    // Buat parameter filter
-    const filter = {
-        search: searchValue,
-        stok_min: stokMin,
-        stok_max: stokMax,
-        lokasi_rak: lokasiRak
-    };
-
-    // Redirect ke URL dengan query string
-    const queryParams = new URLSearchParams(filter).toString();
-    window.location.href = `/export-gudang?${queryParams}`;
-});
-
+        e.preventDefault();
+        const filter = {
+            search: document.getElementById('searchBox').value,
+            stok_min: document.getElementById('stokMin').value,
+            stok_max: document.getElementById('stokMax').value,
+            lokasi_rak: document.getElementById('lokasiRakFilter').value
+        };
+        const queryParams = new URLSearchParams(filter).toString();
+        window.location.href = `/export-gudang?${queryParams}`;
+    });
 </script>
 @endpush

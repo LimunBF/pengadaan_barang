@@ -73,9 +73,27 @@ class TransaksiSheet implements FromCollection, WithHeadings, WithMapping, WithT
     public function map($transaksi): array
     {
         if (is_array($transaksi)) {
-            return $transaksi; // Untuk kasus "Filter Tidak Digunakan"
+            // Jika ini cuma pesan teks (contoh: ["Filter Tidak Digunakan"])
+            if (isset($transaksi[0])) {
+                 return $transaksi;
+            }
+            
+            // Jika ini data dari JS (Associative Array), kita mapping manual
+            // agar urutannya sesuai dengan headings()
+            return [
+                $transaksi['id_transaksi'] ?? '',
+                $transaksi['id_barang'] ?? '',
+                $transaksi['nama_barang'] ?? '',
+                $transaksi['tipe_transaksi'] ?? '',
+                $transaksi['kuantitas'] ?? '',
+                $transaksi['nama_pengirim_penerima'] ?? '',
+                $transaksi['waktu'] ?? '',
+                $transaksi['catatan'] ?? '',
+                $transaksi['photo'] ?? '',
+            ];
         }   
 
+        // Jika data dari Database (Eloquent Model)
         return [
             $transaksi->id_transaksi,
             $transaksi->id_barang,

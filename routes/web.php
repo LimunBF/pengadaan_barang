@@ -14,6 +14,7 @@ use App\Http\Controllers\PetugasController;
 
 // Halaman Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::post('/dashboard/clear', [DashboardController::class, 'clearSession'])->name('dashboard.clear');
 Route::post('/proses', [DashboardController::class, 'process'])->name('dashboard.process');
 Route::get('/fetch-barang', [DashboardController::class, 'fetchBarang'])->name('fetch.barang');
 Route::get('/barcode', function () {
@@ -24,7 +25,7 @@ Route::get('/barcode', function () {
 Route::resource('gudang', GudangController::class);
 Route::get('/gudang/{id}/stok', [GudangController::class, 'show']);
 Route::get('/gudang/{id}/stok', [GudangController::class, 'show'])->name('gudang.stok');
-Route::put('/gudang/edit/{id}', [GudangController::class, 'updatePartial'])->name('gudang.updatePartial');
+Route::put('/gudang/{id}', [GudangController::class, 'update'])->name('gudang.update');
 
 // Rute Untuk Fungsi CRUD Petugas
 Route::get('/petugas', [PetugasController::class, 'index'])->name('petugas.index');

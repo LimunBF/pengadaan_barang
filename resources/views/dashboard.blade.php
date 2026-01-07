@@ -1,306 +1,211 @@
 @extends('layouts.app')
 @section('title', 'Dashboard - Data Gudang')
 @section('content')
-<form method="POST" action="{{ route('transaksi.store') }}" autocomplete="off" class="p-4 shadow-sm rounded bg-light">
+
+{{-- Jika belum ada barang discan, tampilkan tombol scan --}}
+@if(!$barang)
+<div class="container my-5 text-center">
+    <div class="card shadow-sm p-5">
+        <h2 class="text-muted mb-4">Belum ada barang dipilih</h2>
+        <i class="bi bi-qr-code-scan text-primary" style="font-size: 5rem;"></i>
+        <p class="mt-3">Silakan scan barcode barang terlebih dahulu.</p>
+        <div class="mt-3">
+            <a href="{{ route('barcode.index') }}" class="btn btn-primary btn-lg px-5">
+                <i class="bi bi-camera me-2"></i> Mulai Scan
+            </a>
+        </div>
+    </div>
+</div>
+@else
+
+{{-- Jika sudah ada barang, tampilkan Form Transaksi --}}
+<form method="POST" action="{{ route('transaksi.store') }}" autocomplete="off" class="p-4 shadow-sm rounded bg-light container mt-4">
     @csrf
+    
+    {{-- Notifikasi --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     <div class="mb-4">
-        <label for="proses" class="form-label fw-bold">Proses</label>
+        <label for="proses" class="form-label fw-bold">Proses Transaksi</label>
         <input type="hidden" id="proses" name="proses" value="">
         <div class="d-flex gap-3">
-            <button type="button" class="btn btn-primary px-4" onclick="setValue('masuk', this);">Barang Masuk</button>
-            <button type="button" class="btn btn-primary px-4" onclick="setValue('keluar', this);">Barang
-                Keluar</button>
+            <button type="button" class="btn btn-outline-success px-4 w-50" onclick="setValue('masuk', this);">
+                <i class="bi bi-arrow-down-circle me-2"></i> Barang Masuk
+            </button>
+            <button type="button" class="btn btn-outline-danger px-4 w-50" onclick="setValue('keluar', this);">
+                <i class="bi bi-arrow-up-circle me-2"></i> Barang Keluar
+            </button>
         </div>
     </div>
 
+    {{-- Form Container (Hidden by default until process selected) --}}
     <div id="form-container" style="display: none;">
-        <div class="mb-3">
-            <label for="id_barang" class="form-label fw-bold">Scan QR Code / Masukkan ID Barang</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                <input type="text" id="id_barang" name="id_barang" class="form-control"
-                    value="{{ $barang->id_barang ?? '' }}" placeholder="Scan QR atau masukkan ID barang" readonly>
-            </div>
-        </div>
-
-        {{-- Autofill Fields --}}
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="nama_barang" class="form-label fw-bold">Nama Barang</label>
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <input type="text" id="nama_barang" name="nama_barang" class="form-control"
-                    value="{{ $barang->nama_barang ?? '' }}" readonly>
+            {{-- Kolom Kiri: Detail Barang --}}
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-white fw-bold">Detail Barang</div>
+                    <div class="card-body text-center">
+                        {{-- Logic Gambar Barang dengan Asset Storage --}}
+                        @php
+                            $fotoPath = $barang['foto_barang'] ?? null;
+                            $fotoUrl = $fotoPath ? asset('storage/' . $fotoPath) : 'https://via.placeholder.com/150?text=No+Image';
+                        @endphp
+                        <img id="foto-barang"
+                            src="{{ $fotoUrl }}"
+                            alt="Foto Barang" class="img-thumbnail mb-3"
+                            style="max-height: 200px; cursor: pointer;" 
+                            data-bs-toggle="modal" data-bs-target="#fotoBarangModal">
+                        
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">ID</span>
+                            <input type="text" name="id_barang" class="form-control bg-white" value="{{ $barang['id_barang'] }}" readonly>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Nama</span>
+                            <input type="text" class="form-control bg-white" value="{{ $barang['nama_barang'] }}" readonly>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Jenis</span>
+                            <input type="text" class="form-control bg-white" value="{{ $barang['jenis_barang'] }}" readonly>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="jenis_barang" class="form-label fw-bold">Jenis Barang</label>
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <input type="text" id="jenis_barang" name="jenis_barang" class="form-control"
-                    value="{{ $barang->jenis_barang ?? '' }}" readonly>
+
+            {{-- Kolom Kanan: Input Transaksi --}}
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Stok Gudang: <span class="badge bg-primary fs-6">{{ $barang['stok'] }}</span></label>
+                    <input type="number" id="kuantitas" name="kuantitas" class="form-control form-control-lg"
+                        placeholder="Masukkan jumlah..." min="1" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="lokasi_rak" class="form-label fw-bold">Lokasi Rak</label>
+                    <input type="text" id="lokasi_rak" name="lokasi_rak" class="form-control"
+                        value="{{ $barang['lokasi_rak'] }}" placeholder="Update rak jika perlu">
+                </div>
+
+                <div class="mb-3">
+                    <label for="nama_pengirim_penerima" class="form-label fw-bold">Petugas / Penanggung Jawab</label>
+                    <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-select" required>
+                        <option value="" disabled selected>-- Pilih Petugas --</option>
+                        @foreach($petugas as $p)
+                            <option value="{{ $p->nama }}">{{ $p->nama }}</option>
+                        @endforeach
+                    </select>            
+                </div>
+
+                <div class="mb-3">
+                    <label for="catatan" class="form-label fw-bold">Catatan</label>
+                    <textarea id="catatan" name="catatan" class="form-control" rows="2"></textarea>
+                </div>
+
+                {{-- Fitur Kamera (Original) --}}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Foto Bukti (Kamera)</label>
+                    <div class="border p-2 rounded text-center bg-white">
+                        <button type="button" id="open-camera" class="btn btn-sm btn-outline-secondary mb-2">
+                            <i class="bi bi-camera"></i> Buka Kamera
+                        </button>
+                        <div style="position: relative;">
+                            <video id="video" autoplay style="width: 100%; max-height: 200px; display: none; object-fit: cover;" class="rounded"></video>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                        </div>
+                        <button type="button" id="capture" class="btn btn-sm btn-primary mt-2" style="display: none;">Ambil Foto</button>
+                        
+                        <input type="hidden" id="image_data" name="image_data">
+                        <img id="preview" src="#" alt="Hasil Foto" class="img-thumbnail mt-2" style="display: none; max-height: 200px; margin: 0 auto;">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold">SIMPAN TRANSAKSI</button>
             </div>
         </div>
-
-        <div class="mb-3">
-            <label for="kuantitas" class="form-label fw-bold">
-                Stok Saat Ini: <span id="stok-gudang" class="badge bg-info text-dark">{{ $barang->stok ?? 0 }}</span>
-            </label>
-            <input type="number" id="kuantitas" name="kuantitas" class="form-control"
-                placeholder="Masukkan jumlah stok baru" min="0" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="lokasi_rak" class="form-label fw-bold">Lokasi Rak</label>
-            <input type="text" id="lokasi_rak" name="lokasi_rak" class="form-control"
-                value="{{ $barang->lokasi_rak ?? '' }}" placeholder="Masukkan lokasi rak" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="nama_pengirim_penerima" class="form-label fw-bold">Nama Pengirim/Penerima</label>
-            <select id="nama_pengirim_penerima" name="nama_pengirim_penerima" class="form-select" required>
-                <option value="" disabled selected>Pilih Pengirim/Penerima</option>
-                @foreach($petugas as $p)
-                    <option value="{{ $p->nama }}">{{ $p->nama }}</option>
-                @endforeach
-            </select>            
-        </div>
-
-        <div class="mb-3">
-            <label for="catatan" class="form-label fw-bold">Catatan Tambahan</label>
-            <textarea id="catatan" name="catatan" class="form-control" rows="3"></textarea>
-        </div>
-
-        {{-- Tampilan Foto Barang --}}
-        <div class="mb-3">
-            <label for="foto_barang" class="form-label fw-bold">Foto Barang</label>
-            <div class="text-center">
-                <img id="foto-barang"
-                    src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
-                    alt="Foto Barang" class="img-thumbnail"
-                    style="max-width: 300px; max-height: 300px; cursor: pointer;" data-bs-toggle="modal"
-                    data-bs-target="#fotoBarangModal">
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label for="foto_barang" class="form-label fw-bold">Foto Bukti</label>
-            <div>
-                <button type="button" id="open-camera" class="btn btn-outline-secondary mb-3">Buka Kamera</button>
-                <video id="video" autoplay
-                    style="border: 1px solid #ccc; width: 100%; max-width: 480px; display: none;"></video>
-                <canvas id="canvas" style="display: none;"></canvas>
-            </div>
-            <button type="button" id="capture" class="btn btn-outline-primary mt-3" style="display: none;">Ambil
-                Foto</button>
-            <input type="hidden" id="image_data" name="image_data">
-            <img id="preview" src="#" alt="Pratinjau Gambar" class="img-thumbnail mt-3"
-                style="display: none; max-width: 200px;">
-        </div>
-
-        <button type="submit" class="btn btn-success w-100">Submit</button>
     </div>
 </form>
+@endif
 
 {{-- Modal Zoom Gambar --}}
-<div class="modal fade" id="fotoBarangModal" tabindex="-1" aria-labelledby="fotoBarangModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal fade" id="fotoBarangModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="fotoBarangModalLabel">Foto Barang</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modal-foto-barang"
-                    src="{{ $barang->foto_barang ?? 'https://via.placeholder.com/150?text=No+Image' }}"
-                    alt="Foto Barang" class="img-fluid">
+            <div class="modal-body text-center p-0">
+                @php
+                    $modalFotoUrl = isset($barang['foto_barang']) ? asset('storage/' . $barang['foto_barang']) : '#';
+                @endphp
+                <img src="{{ $modalFotoUrl }}" class="img-fluid" alt="Foto Barang">
             </div>
         </div>
     </div>
 </div>
 
-
-{{--FOTO BUKTI BARANG--}}
-
-{{-- JavaScript --}}
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inisialisasi Toast Notification
-            const showToast = (icon, title, text, timer = 3000) => {
-                Swal.fire({
-                    icon,
-                    title,
-                    text,
-                    timer,
-                    showConfirmButton: false,
-                }).then(() => {
-                    if (icon === 'success') {
-                        window.location.href = "{{ route('transaksi.index') }}";
-                    }
-                });
-            };
-
-            // Tampilkan notifikasi berdasarkan session
-            @if (session('success'))
-                showToast('success', 'Berhasil!', '{{ session('success') }}', 2000);
-            @endif
-            @if (session('error'))
-                showToast('error', 'Gagal!', '{{ session('error') }}', 3000);
-            @endif
-
-            // Fungsi Mengatur Nilai Form
-            const setValue = (value, button) => {
-                document.getElementById('proses').value = value;
-
-                // Highlight tombol aktif
-                document.querySelectorAll('.d-flex .btn').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                // Tampilkan form
-                const formContainer = document.getElementById('form-container');
-                if (formContainer) {
-                    formContainer.style.display = 'block';
-                } else {
-                    console.error("Form tidak ditemukan di DOM.");
-                }
-            };
-
-            // Attach ke global scope
-            window.setValue = setValue;
-
-            // Validasi Form Sebelum Submit
-            document.querySelector('form').addEventListener('submit', function () {
-                const proses = document.getElementById('proses').value;
-                const kuantitas = document.getElementById('kuantitas').value;
-                const imageData = document.getElementById('image_data').value;
-                const catatan = document.getElementById('catatan').value.trim();
-
-                if (!proses) {
-                    alert('Silakan pilih proses (Barang Masuk atau Keluar) terlebih dahulu.');
-                    return false;
-                }
-                if (!kuantitas) {
-                    alert('Silakan masukkan jumlah kuantitas.');
-                    return false;
-                }
-                // Cek jika catatan kosong
-                if (!catatan) {
-                    event.preventDefault(); // Cegah form dari submit
-                    showToast('error', 'Gagal!', 'Silakan isi catatan sebelum mengirim.');
-                    return;
-                }
-                if (!imageData) {
-                    event.preventDefault(); // Cegah form dari submit
-                    showToast('error', 'Gagal!', 'Silakan ambil foto bukti sebelum mengirim.');
-                    return;
-                }
-            });
-
-            // Kamera dan Screenshot
-            const openCameraButton = document.getElementById('open-camera');
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const captureButton = document.getElementById('capture');
-            const preview = document.getElementById('preview');
-            const imageDataInput = document.getElementById('image_data');
-
-            let stream = null; // Untuk menyimpan stream kamera
-            let timer = null;  // Untuk menyimpan timer
-            let isPhotoCaptured = false; // Menyimpan status apakah gambar telah diambil
-
-            // Fungsi untuk menutup kamera
-            const stopCamera = () => {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop()); // Hentikan semua track kamera
-                    stream = null;
-                }
-                video.style.display = 'none';
-                captureButton.style.display = 'none';
-
-                // Tampilkan notifikasi hanya jika kamera ditutup karena waktu habis
-                if (!isPhotoCaptured && timer) {
-                    clearTimeout(timer);
-                    timer = null;
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Waktu Habis',
-                        text: 'Waktu pengambilan gambar telah habis. Silakan coba lagi.',
-                        confirmButtonText: 'OK'
-                    });
-                }
-                // Reset status pengambilan gambar
-                isPhotoCaptured = false;
-            };
-            openCameraButton.addEventListener('click', () => {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(mediaStream => {
-                        stream = mediaStream;
-                        video.srcObject = stream;
-                        video.style.display = 'block';
-                        captureButton.style.display = 'block';
-
-                        // Mulai timer untuk mematikan kamera otomatis setelah 30 detik
-                        timer = setTimeout(() => {
-                            stopCamera();
-                        }, 30000); // 30 detik
-                    })
-                    .catch(error => {
-                        alert("Tidak dapat mengakses kamera.");
-                        console.error("Kamera gagal:", error);
-                    });
-            });
-
-            captureButton.addEventListener('click', () => {
-                if (!stream) return; // Jika kamera tidak aktif, abaikan
-
-                // Tangkap gambar dari video
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const imgURL = canvas.toDataURL('image/png');
-                preview.src = imgURL;
-                preview.style.display = 'block';
-                imageDataInput.value = imgURL;
-
-                // Set status bahwa gambar berhasil diambil
-                isPhotoCaptured = true;
-
-                // Tampilkan notifikasi sukses
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Gambar berhasil diambil.',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-
-                // Matikan kamera setelah mengambil gambar
-                stopCamera();
-
-                // Hentikan timer jika masih berjalan
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = null;
-                }
-            });
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const setValue = (value, button) => {
+        document.getElementById('proses').value = value;
+        
+        // Visual feedback tombol aktif
+        document.querySelectorAll('.d-flex .btn').forEach(btn => {
+            btn.classList.remove('active', 'btn-success', 'btn-danger');
+            if(btn.classList.contains('btn-outline-success')) btn.classList.add('btn-outline-success');
+            if(btn.classList.contains('btn-outline-danger')) btn.classList.add('btn-outline-danger');
         });
-    </script>
-    <style>
-        #form-container {
-            display: none;
-        }
 
-        #form-container.show {
-            display: block;
-        }
+        button.classList.remove(value === 'masuk' ? 'btn-outline-success' : 'btn-outline-danger');
+        button.classList.add(value === 'masuk' ? 'btn-success' : 'btn-danger');
+        
+        document.getElementById('form-container').style.display = 'block';
+    };
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-    </style>
+    // Logic Kamera (Persis Original)
+    const openBtn = document.getElementById('open-camera');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture');
+    const preview = document.getElementById('preview');
+    const imageInput = document.getElementById('image_data');
+    let stream = null;
+
+    if(openBtn) {
+        openBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';
+                preview.style.display = 'none';
+                openBtn.style.display = 'none';
+            } catch (err) {
+                alert("Gagal akses kamera: " + err);
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const dataUrl = canvas.toDataURL('image/png');
+            imageInput.value = dataUrl;
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            
+            // Matikan kamera
+            stream.getTracks().forEach(track => track.stop());
+            video.style.display = 'none';
+            captureBtn.style.display = 'none';
+            openBtn.innerText = 'Ambil Ulang';
+            openBtn.style.display = 'inline-block';
+        });
+    }
+</script>
 @endpush
 @endsection

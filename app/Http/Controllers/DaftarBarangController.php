@@ -4,16 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Barang;
+use App\Models\Gudang; // Tambahkan Model Gudang untuk sinkronisasi
+use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Log;
 use App\Services\QRCodeService;
-use App\Services\AuthService; // Tambahkan import AuthService
+use App\Services\AuthService; 
+use Illuminate\Support\Facades\Storage;
 
 class DaftarBarangController extends Controller
 {
+    private $qrCodeService;
+
+    public function __construct(QRCodeService $qrCodeService)
+    {
+        $this->qrCodeService = $qrCodeService;
+        // AuthService::checkLogin(); // Uncomment jika sudah aktif
+    }
+
     public function index(Request $request)
     {
-        // Ambil semua data barang dari database
-        $barang = Barang::all();
         // Reset edit mode jika berasal dari halaman lain
         if ($request->headers->get('referer') && parse_url($request->headers->get('referer'), PHP_URL_PATH) !== '/barang') {
             session()->forget('edit_id');
@@ -23,26 +32,18 @@ class DaftarBarangController extends Controller
         $filter = $request->get('filter', 'ada');
         $barang = Barang::where('kondisi', $filter)->get();
     
-        // Kirim data ke view
         return view('daftar_barang.index', compact('barang', 'filter'));
     }
     
     public function enableEditMode($id)
     {
         session(['edit_id' => $id]);
-        return redirect()->back();
-    }
-
-    private $qrCodeService;
-
-    public function __construct(QRCodeService $qrCodeService)
-    {
-        $this->qrCodeService = $qrCodeService;
-        AuthService::checkLogin(); // Panggil pengecekan login
+        return redirect()->back(); // Kembali ke halaman yang sama (refresh)
     }
 
     public function update(Request $request, $id_barang)
     {
+        // 1. Validasi
         $request->validate([
             'nama_barang' => 'required|string|max:255',
             'jenis_barang' => 'nullable|string|max:255',
@@ -51,9 +52,11 @@ class DaftarBarangController extends Controller
 
         $barang = Barang::findOrFail($id_barang);
 
+        // 2. Siapkan Data Update Dasar
         $dataUpdate = [
             'nama_barang' => $request->nama_barang,
             'jenis_barang' => $request->jenis_barang,
+            // Update isi JSON QR (walaupun path file QR nanti digenerate ulang)
             'kode_qr' => json_encode([
                 'id_barang' => $barang->id_barang,
                 'nama_barang' => $request->nama_barang,
@@ -61,31 +64,52 @@ class DaftarBarangController extends Controller
             ]),
         ];
 
+        // 3. Logika Upload Gambar (Simpan Relative Path)
         if ($request->hasFile('foto_barang')) {
+            // Hapus gambar lama jika ada
             if ($barang->foto_barang) {
-                $relativePath = str_replace(url('storage'), '', $barang->foto_barang);
-                $oldImagePath = storage_path('app/public' . $relativePath);
-
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
+                // Bersihkan path dari URL localhost jika ada sisa data lama
+                $oldPath = str_replace(url('storage') . '/', '', $barang->foto_barang);
+                $oldPath = str_replace('/storage/', '', $oldPath); // Jaga-jaga double slash
+                
+                // Hapus fisik file menggunakan Storage Disk Public
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
                 }
             }
 
+            // Simpan gambar baru (hasilnya: 'barang_photos/xxx.jpg')
             $fotoPath = $request->file('foto_barang')->store('barang_photos', 'public');
-            $fotoUrl = url('storage/' . $fotoPath);
-            $dataUpdate['foto_barang'] = $fotoUrl;
+            
+            // Simpan path relatif ke database (BUKAN URL LENGKAP)
+            $dataUpdate['foto_barang'] = $fotoPath;
         }
 
+        // 4. Eksekusi Update Barang
         $barang->update($dataUpdate);
 
-        // Hapus file QR Code lama
-        $this->qrCodeService->deleteQRCode($barang->id_barang);
+        // 5. Sinkronisasi Nama & Jenis ke Tabel Gudang
+        Gudang::where('id_barang', $id_barang)->update([
+            'nama_barang' => $request->nama_barang,
+            'jenis_barang' => $request->jenis_barang,
+        ]);
 
-        // Generate QR Code baru
+        // 6. Regenerate QR Code (Karena Nama Barang mungkin berubah)
+        // Hapus file QR lama
+        if ($barang->qr_code_path) {
+             // Bersihkan path
+             $oldQrPath = str_replace(url('storage') . '/', '', $barang->qr_code_path);
+             if (Storage::disk('public')->exists($oldQrPath)) {
+                 Storage::disk('public')->delete($oldQrPath);
+             }
+        }
+
+        // Generate baru
+        $namaFileAman = Str::limit(Str::slug($request->nama_barang), 50, '') . '-' . $barang->id_barang . '.png';
         $qrCodePath = $this->qrCodeService->generateQRCode(
             json_encode(['id_barang' => $barang->id_barang]),
-            $barang->id_barang,
-            $barang->nama_barang
+            $namaFileAman, // Gunakan nama file yang bersih
+            $request->nama_barang // Label pada gambar
         );
 
         $barang->update(['qr_code_path' => $qrCodePath]);
@@ -93,23 +117,20 @@ class DaftarBarangController extends Controller
         session()->forget('edit_id');
 
         return redirect()->route('barang.index')
-            ->with('success', 'Barang dan QR Code berhasil diperbarui.');
+            ->with('success', 'Barang berhasil diperbarui (Foto, QR, dan Data Gudang sinkron).');
     }
 
     public function destroy($id_barang)
     {
-        // Cari barang berdasarkan ID
         $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-    
-        // Update kolom kondisi menjadi 'dihapus'
+        
+        // Soft Delete (Ubah status jadi dihapus)
         $barang->update([
             'kondisi' => 'dihapus',
         ]);
     
-        // Pesan sukses
-        return redirect()
-            ->back()
-            ->with('success', 'Barang berhasil diubah kondisinya menjadi dihapus.');
+        return redirect()->back()
+            ->with('success', 'Barang berhasil diarsipkan (kondisi dihapus).');
     }    
 
     public function cancelEdit($id)
@@ -120,28 +141,27 @@ class DaftarBarangController extends Controller
     
     public function downloadQRCode($id_barang)
     {
-        try {
-            // Cari barang berdasarkan id_barang
-            $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
-    
-            // Lokasi file QR Code di folder storage
-            $filePath = storage_path("app/public/barang_qr_codes/{$id_barang}.png");
-    
-            // Logging untuk debugging
-            Log::info("Trying to download file at: {$filePath}");
-    
-            // Cek apakah file ada
-            if (!file_exists($filePath)) {
-                Log::error("File not found: {$filePath}");
-                return redirect()->back()->with('error', 'QR Code tidak ditemukan.');
-            }
-    
-            // Kembalikan file untuk diunduh
-            return response()->download($filePath, "{$id_barang}_qrcode.png");
-        } catch (\Exception $e) {
-            // Tangkap error jika terjadi
-            Log::error("Error downloading QR Code: {$e->getMessage()}");
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mendownload QR Code.');
+        $barang = Barang::where('id_barang', $id_barang)->firstOrFail();
+
+        $path = $barang->qr_code_path;
+
+        if (empty($path)) {
+            return back()->with('error', 'Data QR Code belum digenerate.');
         }
-    }    
+
+        // Bersihkan Path agar aman
+        $cleanPath = str_replace(['/storage/', 'storage/'], '', $path);
+        $cleanPath = ltrim($cleanPath, '/'); 
+
+        // Cek via Storage Facade
+        if (Storage::disk('public')->exists($cleanPath)) {
+            $fullPath = Storage::disk('public')->path($cleanPath);
+            $downloadName = Str::slug($barang->nama_barang) . '-' . $barang->id_barang . '.png';
+            
+            return response()->download($fullPath, $downloadName);
+        }
+
+        Log::error("Gagal download. File fisik hilang di: " . $cleanPath);
+        return back()->with('error', "File QR Code fisik tidak ditemukan. Silakan edit barang untuk generate ulang.");
+    }
 }
